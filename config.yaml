@@ -1,0 +1,32 @@
+# ===========================================================
+#  Cấu hình hệ thống phát hiện té ngã
+#  Mọi ngưỡng bên dưới là GIÁ TRỊ KHỞI ĐẦU, phải hiệu chỉnh bằng
+#  tools/tune.py trên tập validation (không dùng tập test để chỉnh).
+# ===========================================================
+
+model:
+  weights: yolo11n-pose.pt     # có thể thử yolo26n-pose.pt sau khi benchmark
+  imgsz: 320                   # 320 (nhanh) | 416 | 640 (chính xác hơn, chậm hơn)
+  conf: 0.35                   # ngưỡng confidence phát hiện người
+  iou: 0.5
+  tracker: bytetrack.yaml
+  device: cpu
+  threads: 4                   # số luồng PyTorch trên CPU
+
+detector:
+  method: C                    # A = bbox W/H | B = pose tĩnh | C = pose + phân tích thời gian (đề xuất)
+  kp_conf: 0.35                # bỏ qua keypoint có confidence thấp hơn
+  angle_thresh: 60.0           # độ: thân người lệch khỏi phương thẳng đứng
+  ratio_thresh: 1.15           # W/H của bounding box
+  drop_thresh: 0.22            # hông hạ xuống >= 22% chiều dài cơ thể ...
+  drop_window: 1.0             # ... trong vòng 1.0 giây (chỉ phương pháp C)
+  min_descent_speed: 0.6       # vận tốc hạ tức thời tối thiểu (chiều dài cơ thể / giây), đo trong 0.3s — loại "chủ động nằm xuống"
+  descent_memory: 1.2          # cú hạ nhanh còn hiệu lực bao lâu để chờ tư thế nằm (giây)
+  confirm_time: 1.5            # nằm liên tục bao lâu thì xác nhận FALL (giây)
+  confirm_ratio: 0.7           # tỷ lệ frame "nằm" tối thiểu trong giai đoạn SUSPECTED
+  recover_time: 2.0            # đứng/ngồi thẳng bao lâu thì về NORMAL (giây)
+  alert_cooldown: 10.0         # không cảnh báo lặp cho cùng 1 người trong khoảng này (giây)
+  track_ttl: 3.0               # giữ lịch sử track đã mất dấu (giây) để nối lại ID
+  reassoc_dist: 0.6            # khoảng cách tâm (theo chiều dài cơ thể) để nối ID mới với ID cũ
+  dup_overlap: 0.6             # 2 khung chồng nhau >= 60% = cùng 1 người, bỏ khung trùng (1.0 = tắt)
+  ratio_fallback: true         # B/C: thiếu vai/hông thì dùng W/H thay góc thân (demo webcam: đặt false)

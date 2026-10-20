@@ -1,0 +1,10 @@
+video,split,fall_start,fall_end,note
+V01_walk_front.mp4,val,,,di lai binh thuong
+V02_sit_chair.mp4,val,,,ngoi xuong ghe
+V03_bend_pick.mp4,val,,,cui nhat do
+V04_lie_down.mp4,val,,,chu dong nam xuong
+V05_fall_forward.mp4,val,3.20,5.40,nga ve phia truoc
+V06_fall_getup.mp4,val,2.80,4.90,nga roi dung day
+V07_two_people.mp4,val,6.10,8.00,2 nguoi - 1 nguoi nga
+V08_fall_twice.mp4,test,2.50,4.30,video co 2 cu nga: moi cu 1 dong
+V08_fall_twice.mp4,test,12.00,14.10,video co 2 cu nga: moi cu 1 dong

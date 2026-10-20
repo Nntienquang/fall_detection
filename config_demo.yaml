@@ -1,0 +1,32 @@
+# ===========================================================
+#  Cấu hình DEMO — tốt nhất trên tập test UR Fall (F1 = 0.86)
+#  Phương pháp B (góc thân người), ảnh vào 640, ngưỡng chọn trên tập val.
+#  Dùng:  python main.py --source 0 --config config_demo.yaml
+#         streamlit run app.py   (app tự đọc file này nếu có)
+#  Phương pháp đề xuất C và so sánh đầy đủ: docs/PHAN_TICH_KET_QUA.md
+# ===========================================================
+model:
+  weights: yolo11n-pose.pt
+  imgsz: 640
+  conf: 0.35
+  iou: 0.5
+  tracker: bytetrack.yaml
+  device: cpu
+  threads: 4
+detector:
+  method: B
+  kp_conf: 0.35
+  angle_thresh: 45.0
+  ratio_thresh: 1.0
+  drop_thresh: 0.22
+  drop_window: 1.0
+  min_descent_speed: 0.6
+  descent_memory: 1.2
+  confirm_time: 0.5
+  confirm_ratio: 0.7
+  recover_time: 2.0
+  alert_cooldown: 10.0
+  track_ttl: 3.0
+  reassoc_dist: 0.6
+  dup_overlap: 0.6
+  ratio_fallback: false        # thiếu vai/hông (ngồi sát webcam) thì không đoán bằng W/H → tránh báo nhầm
