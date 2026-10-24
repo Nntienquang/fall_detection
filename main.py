@@ -5,6 +5,8 @@ Ví dụ:
   python main.py --source data/videos/V05.mp4 --save-video    # video MP4
   python main.py --source data/videos/V05.mp4 --no-display --max-frames 300   # benchmark
   python main.py --source 0 --method B --imgsz 416 --threads 4
+  python main.py --source 0 --config config_demo.yaml --fullscreen   # demo toàn màn hình
+Trong cửa sổ: Q / Esc = thoát · F = bật/tắt toàn màn hình · kéo góc cửa sổ để phóng to
 """
 from __future__ import annotations
 
@@ -34,6 +36,9 @@ def parse_args():
     ap.add_argument("--save-video", action="store_true", help="lưu annotated.mp4")
     ap.add_argument("--max-frames", type=int, default=0, help="dừng sau N frame (0 = không giới hạn)")
     ap.add_argument("--out", default="outputs", help="thư mục lưu kết quả")
+    ap.add_argument("--fullscreen", action="store_true", help="mở cửa sổ toàn màn hình (phím F để bật/tắt)")
+    ap.add_argument("--window-scale", type=float, default=1.6,
+                    help="phóng cửa sổ so với khung hình gốc (mặc định 1.6 → 640x480 hiện thành 1024x768)")
     return ap.parse_args()
 
 
@@ -55,6 +60,15 @@ def main() -> int:
     source = VideoSource(args.source)
     logger = EventLogger(args.out, meta={"source": args.source, **cfg.to_dict()})
     print(f"[INFO] Kết quả lưu tại: {logger.dir}")
+
+    win = "Fall Detection - Q: thoat | F: toan man hinh"
+    fullscreen = args.fullscreen
+    if not args.no_display:
+        # WINDOW_NORMAL: cửa sổ kéo giãn được; KEEPRATIO: giữ đúng tỷ lệ khung hình khi phóng to
+        cv2.namedWindow(win, cv2.WINDOW_NORMAL | cv2.WINDOW_KEEPRATIO)
+        if fullscreen:
+            cv2.setWindowProperty(win, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+    sized = False
 
     infer_ms, loop_ms = [], []
     fps_ema = 0.0
@@ -86,9 +100,18 @@ def main() -> int:
             if args.save_video:
                 logger.write_frame(vis, source.fps if not source.is_camera else max(fps_ema, 1.0))
             if not args.no_display:
-                cv2.imshow("Fall Detection (Q de thoat)", vis)
-                if cv2.waitKey(1) & 0xFF in (ord("q"), 27):
+                cv2.imshow(win, vis)
+                if not sized and not fullscreen:
+                    h, w = vis.shape[:2]
+                    cv2.resizeWindow(win, int(w * args.window_scale), int(h * args.window_scale))
+                    sized = True
+                key = cv2.waitKey(1) & 0xFF
+                if key in (ord("q"), ord("Q"), 27):
                     break
+                if key in (ord("f"), ord("F")):
+                    fullscreen = not fullscreen
+                    cv2.setWindowProperty(win, cv2.WND_PROP_FULLSCREEN,
+                                          cv2.WINDOW_FULLSCREEN if fullscreen else cv2.WINDOW_NORMAL)
             if args.max_frames and n >= args.max_frames:
                 break
     except KeyboardInterrupt:
