@@ -31,7 +31,7 @@ def parse_args():
     ap.add_argument("--weights", help="ghi đè model.weights")
     ap.add_argument("--imgsz", type=int, help="ghi đè model.imgsz")
     ap.add_argument("--threads", type=int, help="ghi đè model.threads")
-    ap.add_argument("--method", choices=["A", "B", "C"], help="ghi đè detector.method")
+    ap.add_argument("--method", choices=["A", "B", "C", "D"], help="ghi đè detector.method (D = học máy)")
     ap.add_argument("--no-display", action="store_true", help="không mở cửa sổ (benchmark / server)")
     ap.add_argument("--save-video", action="store_true", help="lưu annotated.mp4")
     ap.add_argument("--max-frames", type=int, default=0, help="dừng sau N frame (0 = không giới hạn)")

@@ -38,7 +38,8 @@ class _Track:
     last_descent_t: float | None = None
     last_fast_t: float | None = None
     support_hist: deque = field(default_factory=lambda: deque(maxlen=90))  # (t, có chống tay) khi thân ngang
-    stand_ref: tuple[float, float] | None = None  # (hip_y, body_len) lần gần nhất đứng thẳng
+    stand_ref: tuple[float, float, float] | None = None  # (hip_y, body_len, box_h) lần gần nhất đứng thẳng
+    prob: float = 0.0                                     # phương pháp D: xác suất "đang nằm" của khung hiện tại
     motion_hist: deque = field(default_factory=lambda: deque(maxlen=150))  # (t, x vai, y vai, body_len)
     susp_frames: int = 0
     susp_horiz: int = 0
@@ -52,10 +53,15 @@ class _Track:
 
 class FallDetector:
     def __init__(self, cfg: DetectorConfig):
-        if cfg.method not in ("A", "B", "C"):
-            raise ValueError("method phải là A, B hoặc C")
+        if cfg.method not in ("A", "B", "C", "D"):
+            raise ValueError("method phải là A, B, C hoặc D")
         self.cfg = cfg
         self.tracks: dict[int, _Track] = {}
+        self.model = None
+        if cfg.method == "D":
+            from .learned import LearnedModel
+            self.model = LearnedModel(cfg.learned_model)
+        self.collect: list | None = None   # tools/train_fall_model.py: gom (id, t, body_len, vectơ đặc trưng)
 
     # ------------------------------------------------------------------ #
     def reset(self) -> None:
@@ -92,6 +98,9 @@ class FallDetector:
                 f.truncated = self._truncated(p, frame_shape)
             if not f.valid:
                 continue
+            if self.model is not None or self.collect is not None:
+                from .learned import static_features
+                f.static_x = static_features(p.bbox, p.keypoints, p.kp_conf, self.cfg.kp_conf, f.legs_upright)
             tr = self._get_track(p.track_id, f, t, current_ids)
             res, ev = self._step(p.track_id, tr, f, t)
             results.append(res)
@@ -199,16 +208,30 @@ class FallDetector:
         tr.motion_hist.append((t, f.anchor[0], f.anchor[1], f.body_len))
         tr.last_seen, tr.last_center, tr.last_len = t, f.center, f.body_len
 
-        h = self.is_horizontal(f)
+        drop, speed = self._descent(tr, t)
+        x = None
+        if f.static_x is not None:
+            from .learned import temporal_features
+            ref = tr.stand_ref
+            x = np.concatenate([f.static_x, temporal_features(
+                None if ref is None else (f.hip_y - ref[0]) / max(ref[1], 1.0),
+                None if ref is None else f.box_h / max(ref[2], 1.0),
+                speed, self._motion(tr, t))])
+            if self.collect is not None:
+                self.collect.append((tid, t, f.body_len, x))
+        if self.model is not None and not (c.edge_guard and f.truncated):
+            tr.prob = self.model.proba(x)          # D: mạng nơ-ron quyết định "đang nằm"
+            h = tr.prob >= c.learned_thresh
+        else:
+            h = self.is_horizontal(f)
         unknown = h is None
         horizontal = bool(h)
         if h is False and f.torso_angle is not None and f.torso_angle < 30:
-            tr.stand_ref = (f.hip_y, f.body_len)
+            tr.stand_ref = (f.hip_y, f.body_len, f.box_h)
         if horizontal and c.bend_guard and f.legs_upright and tr.stand_ref is not None:
             # Cúi người: thân ngang nhưng chân vẫn dựng đứng và hông chưa hạ so với lúc đứng → coi là đứng.
             if (f.hip_y - tr.stand_ref[0]) / max(tr.stand_ref[1], 1.0) < c.bend_hip_drop:
                 horizontal = False
-        drop, speed = self._descent(tr, t)
         tr.speed = speed
         if speed >= c.min_descent_speed:
             tr.last_fast_t = t

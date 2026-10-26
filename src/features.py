@@ -37,6 +37,8 @@ class PoseFeatures:
     truncated: bool = False     # người bị cắt ở mép ảnh (chạm mép + không thấy cổ chân) → khung xương không đáng tin
     anchor: tuple[float, float] | None = None  # trung điểm vai (không thấy vai thì tâm khung) — dùng đo mức cử động
     legs_upright: bool = False  # hông ở ngay trên cổ chân (chân dựng đứng) — dấu hiệu đang đứng/cúi
+    box_h: float = 0.0          # chiều cao khung người (pixel)
+    static_x: object = None     # vectơ đặc trưng cho phương pháp D (src/learned.py), chỉ tính khi cần
 
     @property
     def valid(self) -> bool:
@@ -116,6 +118,7 @@ def compute_features(bbox: np.ndarray, kps: np.ndarray, conf: np.ndarray, kp_thr
         arm_drop=arm_drop(kps, conf, kp_thr, body_len, bbox),
         anchor=_anchor(kps, conf, kp_thr, ((x1 + x2) / 2.0, (y1 + y2) / 2.0)),
         legs_upright=_legs_upright(kps, conf, kp_thr, body_len),
+        box_h=h,
     )
 
 

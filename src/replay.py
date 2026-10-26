@@ -16,10 +16,13 @@ from .fall_detector import FallDetector
 from .types import FallEvent, Person
 
 
-def save_cache(path: str | Path, video: str, fps: float, frames: list[dict], infer_ms_median: float) -> None:
+def save_cache(path: str | Path, video: str, fps: float, frames: list[dict], infer_ms_median: float,
+               frame_shape: tuple[int, int] | None = None) -> None:
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     data = {"video": video, "fps": fps, "n_frames": len(frames),
             "infer_ms_median": infer_ms_median, "frames": frames}
+    if frame_shape:
+        data["frame_shape"] = [int(frame_shape[0]), int(frame_shape[1])]  # (cao, rộng)
     with gzip.open(path, "wt", encoding="utf-8") as fh:
         json.dump(data, fh)
 
@@ -75,4 +78,10 @@ def read_labels(path: str | Path) -> dict[str, dict]:
 
 
 def cache_path_for(cache_dir: str | Path, video: str) -> Path:
-    return Path(cache_dir) / (Path(video).stem + ".json.gz")
+    """ur_fall-01.mp4 → ur_fall-01.json.gz (giữ tên cũ);
+    "Subject 1/Fall/01.mp4" → Subject_1_Fall_01.json.gz (video nằm trong thư mục con, tránh trùng tên)."""
+    p = Path(video)
+    if len(p.parts) == 1:
+        return Path(cache_dir) / (p.stem + ".json.gz")
+    name = "_".join(p.with_suffix("").parts).replace(" ", "_")
+    return Path(cache_dir) / (name + ".json.gz")

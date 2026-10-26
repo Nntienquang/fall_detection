@@ -9,6 +9,9 @@ results/
 results_*/
 data/videos/*
 !data/videos/video_test_goc.mp4
+!data/videos/ur_*.mp4
+!data/videos/UR_FALL_NGUON.txt
 config.tuned.yaml
 config.sim_tuned.yaml
 .pytest_cache/
+data/gmdcsa24/

@@ -61,10 +61,10 @@ imgsz = st.sidebar.select_slider("Kích thước ảnh vào (imgsz)", [256, 320,
 threads = st.sidebar.slider("Số luồng CPU", 1, 8, BASE.model.threads)
 
 st.sidebar.subheader("Thuật toán")
-METHODS = ["C", "B", "A"]
+METHODS = ["D", "C", "B", "A"]
 method = st.sidebar.radio("Phương pháp", METHODS, index=METHODS.index(BASE.detector.method),
                           format_func={"A": "A — Bounding box W/H", "B": "B — Góc thân người",
-                                       "C": "C — Pose + thời gian (đề xuất)"}.get)
+                                       "C": "C — Pose + thời gian", "D": "D — Học máy (MLP)"}.get)
 d = BASE.detector
 angle = st.sidebar.slider("Ngưỡng góc thân (độ)", 30.0, 85.0, d.angle_thresh, 1.0)
 ratio = st.sidebar.slider("Ngưỡng W/H", 0.8, 2.0, d.ratio_thresh, 0.05)

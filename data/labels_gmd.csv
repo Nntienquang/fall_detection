@@ -1,0 +1,161 @@
+video,split,fall_start,fall_end,note
+Subject 1/Fall/01.mp4,train_gmd,3.40,6.00,Falling from sitting on the chair to the ground. Left side Fall. Full body not visible
+Subject 1/Fall/02.mp4,train_gmd,1.90,6.00,Falling from sitting on the chair to the ground. Left side Fall. Full body not visible
+Subject 1/Fall/03.mp4,train_gmd,2.50,5.00,Falling from sitting on the chair to the ground. Left side fall
+Subject 1/Fall/04.mp4,train_gmd,2.30,4.00,Falling from sitting on the chair to the ground. Right side fall
+Subject 1/Fall/05.mp4,train_gmd,1.80,5.00,Walking to falling. Right side fall
+Subject 1/Fall/06.mp4,train_gmd,2.20,5.00,Walking to falling. Right side fall
+Subject 1/Fall/07.mp4,train_gmd,1.10,5.00,Walking to falling. Right side fall
+Subject 1/Fall/08.mp4,train_gmd,0.80,4.00,Walking to falling. Left side fall
+Subject 1/Fall/09.mp4,train_gmd,0.70,4.00,Standing position to falling. Forward Fall. Full body (head) not visible
+Subject 1/Fall/10.mp4,train_gmd,0.70,4.00,Standing position to falling. Forward Fall. Full body (right eye) not visible
+Subject 1/Fall/11.mp4,train_gmd,1.00,6.00,Standing position to falling
+Subject 1/Fall/12.mp4,train_gmd,1.90,6.00,Standing position to falling. Backward Fall
+Subject 1/Fall/13.mp4,train_gmd,0.40,4.00,Standing position to falling. Backward fall. Full body (head) is not visible
+Subject 1/Fall/14.mp4,train_gmd,0.30,5.00,Standing position to falling. Backward fall. Full body (both ankles) is not visible
+Subject 1/Fall/15.mp4,train_gmd,1.80,6.00,Sitting on the chair (side view) to right side fall
+Subject 1/Fall/16.mp4,train_gmd,2.80,6.00,Sitting on the chair (side view) to the left side fall
+Subject 1/ADL/01.mp4,train_gmd,,,Sitting on the bed to sleeping right side on the bed. Face towards camera
+Subject 1/ADL/02.mp4,train_gmd,,,Sitting on the bed to sleeping left side on the bed. Face towards the camera
+Subject 1/ADL/03.mp4,train_gmd,,,Sitting on the bed to sleeping left side on the bed. Face towards the ceiling
+Subject 1/ADL/04.mp4,train_gmd,,,From sleeping left side on the bed (Face towards the ceiling) to sitting on the bed
+Subject 1/ADL/05.mp4,train_gmd,,,Coming to the bed and reading book in the sitting position. Front view of the subject. One leg folded
+Subject 1/ADL/06.mp4,train_gmd,,,Sitting on the bed (front view) to reading the book while supporting towards the wall. Side view
+Subject 1/ADL/07.mp4,train_gmd,,,Reading book while sitting on the chair; Front view;Leg straight
+Subject 1/ADL/08.mp4,train_gmd,,,Walking in the room
+Subject 1/ADL/09.mp4,train_gmd,,,Reading book while walking in the room
+Subject 1/ADL/10.mp4,train_gmd,,,Reading book while walking in the room
+Subject 1/ADL/11.mp4,train_gmd,,,Walking to sitting on the chair and then reading book
+Subject 1/ADL/12.mp4,train_gmd,,,Reading book while sitting on the chair to stand up and keeping the book on the chair and going out of the room
+Subject 1/ADL/13.mp4,train_gmd,,,Walking to sitting on the chair (side view)
+Subject 1/ADL/14.mp4,train_gmd,,,Sitting on the chair (side view) to walking
+Subject 1/ADL/15.mp4,train_gmd,,,Walking to picking a mobile phone from the ground and then sitting on the chair
+Subject 1/ADL/16.mp4,train_gmd,,,Picking the mobile phone from the ground while sitting on the chair
+Subject 2/Fall/01.mp4,train_gmd,1.40,6.00,Right side fall on the ground
+Subject 2/Fall/02.mp4,train_gmd,2.70,8.00,Right side fall on the ground after walking
+Subject 2/Fall/03.mp4,train_gmd,0.00,7.00,Forward fall on the bed
+Subject 2/Fall/04.mp4,train_gmd,3.30,10.00,Seeing outside the window then backward fall
+Subject 2/Fall/05.mp4,train_gmd,0.80,4.00,Left side fall (face hidden by hand)
+Subject 2/Fall/06.mp4,train_gmd,2.10,6.00,Walking while seeing the mobile phone then fall backward (left hand not fully in the frame)
+Subject 2/Fall/07.mp4,train_gmd,2.00,4.00,Falling (forward) after trying to pick the bottle from the ground
+Subject 2/Fall/08.mp4,train_gmd,3.20,6.00,Reading a newspaper in the sitting position on the ground then falling backward
+Subject 2/Fall/09.mp4,train_gmd,1.80,5.00,Falling backward after walking
+Subject 2/Fall/10.mp4,train_gmd,2.00,11.00,Right side fall then backward
+Subject 2/Fall/11.mp4,train_gmd,5.90,10.00,Falling from bed to ground
+Subject 2/Fall/12.mp4,train_gmd,6.90,12.00,Drinking water from the water bottle then falling backwards
+Subject 2/Fall/13.mp4,train_gmd,2.50,8.00,Falling backward (side view)
+Subject 2/Fall/14.mp4,train_gmd,3.40,11.00,Falling backward on the bed
+Subject 2/Fall/15.mp4,train_gmd,7.70,11.00,Writing while sitting on the bed; then falling on the ground
+Subject 2/Fall/16.mp4,train_gmd,0.80,4.00,Walking then falling forward
+Subject 2/Fall/17.mp4,train_gmd,2.50,6.00,Walking then falling forward
+Subject 2/Fall/18.mp4,train_gmd,9.80,11.00,Picking a water bottle from the ground and drinking water from it then falling forward on the ground
+Subject 2/Fall/19.mp4,train_gmd,8.20,15.00,Eating in standing position then falling forward
+Subject 2/Fall/20.mp4,train_gmd,7.90,11.00,Eating in standing position then falling forward
+Subject 2/Fall/21.mp4,train_gmd,6.20,9.00,Standing then falling sideways
+Subject 2/Fall/22.mp4,train_gmd,1.30,5.00,Walking then falling forward
+Subject 2/Fall/23.mp4,train_gmd,3.60,7.00,Standing then falling sideways
+Subject 2/Fall/24.mp4,train_gmd,3.30,6.40,Standing from the bed and then falling sideways on the ground
+Subject 2/Fall/25.mp4,train_gmd,3.00,7.00,Standing then falling backward on the ground
+Subject 2/ADL/01.mp4,train_gmd,,,Talking on the mobile phone while sitting on the bed and walking
+Subject 2/ADL/02.mp4,train_gmd,,,Picking up a water bottle from the ground and drinking while sitting on the bed
+Subject 2/ADL/03.mp4,train_gmd,,,Walking; removing dust from the bed using a pillow; and sleeping on the bed
+Subject 2/ADL/04.mp4,train_gmd,,,Yoga: Standing forward bend (Uttanasana)
+Subject 2/ADL/05.mp4,train_gmd,,,Throwing a book on the bed; standing up from the ground; walking; and opening the curtain
+Subject 2/ADL/06.mp4,train_gmd,,,Picking up the mobile phone from the ground; placing it on the bed; and sitting on the bed
+Subject 2/ADL/07.mp4,train_gmd,,,Exercising (Moving both hands up and down)
+Subject 2/ADL/08.mp4,train_gmd,,,Exercising (Stretching thigh and trying to touch the ground:Pyramid Pose)
+Subject 2/ADL/09.mp4,train_gmd,,,Standing up from a sitting position on the bed and then sitting on the ground
+Subject 2/ADL/10.mp4,train_gmd,,,Standing up from the ground and closing the curtain
+Subject 2/ADL/11.mp4,train_gmd,,,Removing the shirt and hanging it on the hanger
+Subject 2/ADL/12.mp4,train_gmd,,,Going to bed and sleeping (belly facing downwards)
+Subject 2/ADL/13.mp4,train_gmd,,,Sitting on the ground and reading a book
+Subject 2/ADL/14.mp4,train_gmd,,,Walking and reading something while sitting on the bed
+Subject 2/ADL/15.mp4,train_gmd,,,Reading a newspaper while sitting on the bed and placing a pillow on the lap
+Subject 2/ADL/16.mp4,train_gmd,,,Reading a newspaper; throwing the newspaper; and sleeping
+Subject 2/ADL/17.mp4,train_gmd,,,Standing up from bed; walking; and checking the dress on the hanger
+Subject 2/ADL/18.mp4,train_gmd,,,Walking; opening the window; and looking outside
+Subject 2/ADL/19.mp4,train_gmd,,,Sitting on the ground and writing in a notebook
+Subject 2/ADL/20.mp4,train_gmd,,,Standing up; picking up a water bottle; and drinking water while sitting on the ground
+Subject 2/ADL/21.mp4,train_gmd,,,Picking up a pen from the ground and walking
+Subject 2/ADL/22.mp4,train_gmd,,,Exercising (Push-up) and sitting
+Subject 2/ADL/23.mp4,train_gmd,,,Eating biscuits while sitting on the bed with legs folded
+Subject 3/Fall/01.mp4,train_gmd,0.00,3.00,falling forward
+Subject 3/Fall/02.mp4,train_gmd,2.60,6.00,Falling on the bed (forward)
+Subject 3/Fall/03.mp4,train_gmd,1.50,5.00,Falling backward on the floor
+Subject 3/Fall/04.mp4,train_gmd,1.20,5.00,Walking and then falling backward on the floor
+Subject 3/Fall/05.mp4,train_gmd,3.20,10.00,Falling slowly from standing position to the floor
+Subject 3/Fall/06.mp4,train_gmd,0.00,5.00,Falling (backward) on the floor from the sitting position
+Subject 3/Fall/07.mp4,train_gmd,1.00,9.00,Falling on the floor from the standing position
+Subject 3/Fall/08.mp4,train_gmd,0.00,6.00,Falling on the right side onto the floor from a standing position
+Subject 3/Fall/09.mp4,train_gmd,3.30,6.00,Reading the book while sitting on the ground; then falling backward
+Subject 3/Fall/10.mp4,train_gmd,1.70,4.00,Falling forward on the bed
+Subject 3/Fall/11.mp4,train_gmd,4.70,8.00,Eating in standing position then falling forward
+Subject 3/Fall/12.mp4,train_gmd,1.60,4.00,Falling backward from the bed
+Subject 3/Fall/13.mp4,train_gmd,1.40,4.00,Writing something in a notebook while sitting position on the floor; then falling backward
+Subject 3/Fall/14.mp4,train_gmd,8.10,12.00,Falling backward on the floor while removing the shirt and trying to hang it on the hangar
+Subject 3/Fall/15.mp4,train_gmd,1.90,5.00,Trying to drink water from the water bottle and then falling on the floor
+Subject 3/Fall/16.mp4,train_gmd,1.80,7.00,Walking and then falling left side on the floor
+Subject 3/Fall/17.mp4,train_gmd,1.40,8.00,Reading newspaper then falling Backward on the bed
+Subject 3/Fall/18.mp4,train_gmd,4.20,11.00,Sitting on the bed; then falling on the floor
+Subject 3/Fall/19.mp4,train_gmd,2.00,5.00,Falling on the floor from the standing position
+Subject 3/Fall/20.mp4,train_gmd,2.30,6.00,Walking then falling forward on the floor
+Subject 3/Fall/21.mp4,train_gmd,5.40,9.00,Drinking in standing position then falling sideways
+Subject 3/ADL/01.mp4,train_gmd,,,Writing something in the notebook while sitting on the bed
+Subject 3/ADL/02.mp4,train_gmd,,,Exercise (Hand up & down)
+Subject 3/ADL/03.mp4,train_gmd,,,Getting up from the sleeping position from the bed; Putting a mask on the face; then walking
+Subject 3/ADL/04.mp4,train_gmd,,,Picking a book from the floor and putting it on the bed; sitting on the bed
+Subject 3/ADL/05.mp4,train_gmd,,,Exercising (hand down & up with body bending)
+Subject 3/ADL/06.mp4,train_gmd,,,Exercising then sitting down on the floor
+Subject 3/ADL/07.mp4,train_gmd,,,Exercising (sitting and standing)
+Subject 3/ADL/08.mp4,train_gmd,,,Sitting to sleeping on the floor
+Subject 3/ADL/09.mp4,train_gmd,,,Sleeping on the floor to sitting and then standing
+Subject 3/ADL/10.mp4,train_gmd,,,Opening the window curtain and the window
+Subject 3/ADL/11.mp4,train_gmd,,,Closing the window curtain and the window
+Subject 3/ADL/12.mp4,train_gmd,,,Changing pages of a book while sitting on the bed; standing
+Subject 3/ADL/13.mp4,train_gmd,,,Sitting on the floor
+Subject 3/ADL/14.mp4,train_gmd,,,Sitting on the floor & drinking water from the water bottle
+Subject 3/ADL/15.mp4,train_gmd,,,Reading newspaper while sitting on the floor
+Subject 3/ADL/16.mp4,train_gmd,,,Eating while sitting on the ground
+Subject 3/ADL/17.mp4,train_gmd,,,Drinking water from a water bottle while sitting on the bed Putting the water bottle on the bed
+Subject 3/ADL/18.mp4,train_gmd,,,Walking; sitting on the bed and eating biscuits
+Subject 3/ADL/19.mp4,train_gmd,,,Picking the pen from the floor and putting it on the bed
+Subject 3/ADL/20.mp4,train_gmd,,,Talking on the phone while sitting on the bed
+Subject 3/ADL/21.mp4,train_gmd,,,Drinking while sitting on the bed
+Subject 3/ADL/22.mp4,train_gmd,,,Writing while sitting on the bed
+Subject 4/Fall/01.mp4,test_gmd,1.80,4.00,Standing on the bed to falling (LS) on the bed
+Subject 4/Fall/02.mp4,test_gmd,1.50,2.00,Falling (LS) from the bed to the floor
+Subject 4/Fall/03.mp4,test_gmd,1.70,6.00,Walking then falling (forward) view 1
+Subject 4/Fall/04.mp4,test_gmd,1.20,4.00,Walking then falling (forward) view 2
+Subject 4/Fall/05.mp4,test_gmd,2.70,7.00,Falling (RS) on the bed from sitting on the bed
+Subject 4/Fall/06.mp4,test_gmd,1.10,6.00,Falling (LS) on the bed from sitting on the bed then falling (RS) to the floor
+Subject 4/Fall/07.mp4,test_gmd,2.40,6.00,Walking then falling (LS) on the floor
+Subject 4/Fall/08.mp4,test_gmd,2.30,6.00,Falling backward on the bed from sitting on the bed
+Subject 4/Fall/09.mp4,test_gmd,2.30,6.00,Falling backward on the bed from sitting on the bed
+Subject 4/Fall/10.mp4,test_gmd,2.20,5.00,Reading a book while sitting on the chair then falling (FW) on the ground
+Subject 4/Fall/11.mp4,test_gmd,1.20,4.00,Walking then falling (FW: only waist to toe is visible after falling)
+Subject 4/Fall/12.mp4,test_gmd,1.50,4.00,Falling (FW)to the floor from sitting on the bed
+Subject 4/Fall/13.mp4,test_gmd,0.30,5.00,Falling (sideways) on the bed from sitting on the bed
+Subject 4/Fall/14.mp4,test_gmd,0.80,5.00,Falling (RS) on the bed from sitting on the bed then falling (LS) to the floor
+Subject 4/Fall/15.mp4,test_gmd,1.70,4.00,Falling (FW) on the floor from sitting on the bed
+Subject 4/Fall/16.mp4,test_gmd,3.20,7.00,Walking then falling (FW) on the floor
+Subject 4/Fall/17.mp4,test_gmd,2.80,6.00,Falling (LS) on the bed from sitting on the bed
+Subject 4/ADL/01.mp4,test_gmd,,,Wiping the face with a handkerchief while sitting on the bed; cleaning the goggles and putting them on
+Subject 4/ADL/02.mp4,test_gmd,,,Talking on the mobile phone while walking
+Subject 4/ADL/03.mp4,test_gmd,,,Reading a book while sitting on the bed
+Subject 4/ADL/04.mp4,test_gmd,,,Using a laptop while sitting on the bed
+Subject 4/ADL/05.mp4,test_gmd,,,Doing exercise (push-up); view 1
+Subject 4/ADL/06.mp4,test_gmd,,,Doing exercise (push-up); view 2
+Subject 4/ADL/07.mp4,test_gmd,,,Doing exercise (push-up); view 3
+Subject 4/ADL/08.mp4,test_gmd,,,Sleeping to sitting; putting on the goggles and drinking water
+Subject 4/ADL/09.mp4,test_gmd,,,Reading a book and checking the mobile phone while sitting on the bed
+Subject 4/ADL/10.mp4,test_gmd,,,Walking then sleeping on the bed after removing the goggles
+Subject 4/ADL/11.mp4,test_gmd,,,Copying content from a book into a notebook while sitting on the floor
+Subject 4/ADL/12.mp4,test_gmd,,,Stopping copying from a book and drinking water while sitting on the floor
+Subject 4/ADL/13.mp4,test_gmd,,,Writing while sitting on the chair
+Subject 4/ADL/14.mp4,test_gmd,,,Sitting in the chair to standing on the floor; then picking up the water bottle and drinking water from it
+Subject 4/ADL/15.mp4,test_gmd,,,Sitting to sleeping on the bed
+Subject 4/ADL/16.mp4,test_gmd,,,Sitting on the bed; removing the goggles; then sleeping
+Subject 4/ADL/17.mp4,test_gmd,,,Picking up the book from the floor and putting it on the bed
+Subject 4/ADL/18.mp4,test_gmd,,,Wiping the face with a handkerchief; putting on the goggles; then reading a book
+Subject 4/ADL/19.mp4,test_gmd,,,Walking; then picking up the biscuit jar and eating biscuits from it after sitting on the bed
+Subject 4/ADL/20.mp4,test_gmd,,,Eating biscuits then picking up the water bottle from the floor and drinking the water from it after sitting on the bed; keeping the bottle on the floor

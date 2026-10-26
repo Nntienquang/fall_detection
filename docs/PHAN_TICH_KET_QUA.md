@@ -189,3 +189,42 @@ Khi kết hợp với luật nằm yên: không còn báo nhầm nào trên cả
 **Áp dụng.** Bật trong `config_demo.yaml`; khi demo, ngã **ngang qua khung hình**, không ngã thẳng về phía camera.
 Thí nghiệm chính giữ nguyên. Kiểm thử: `test_bending_and_holding_does_not_alarm_with_bend_guard`,
 `test_real_fall_still_alarms_with_all_webcam_rules` (29/29 passed).
+
+## Bổ sung 26/10 (5) — Phương pháp D: học máy trên dữ liệu công khai GMDCSA24
+
+**Dữ liệu thêm.** GMDCSA24 (Alam et al., 2024, giấy phép MIT, github.com/ekramalam/GMDCSA24-A-Dataset-for-Human-Fall-Detection-in-Videos):
+4 người, 79 video ngã (22 ngã ngửa, 17 ngã sấp, nhiều cú ngã xuống giường) + 81 video sinh hoạt (ngủ trên giường, ngồi, cúi, tập thể dục).
+Khung xương trích bằng YOLO11n-Pose ảnh 416 (`tools/cache_poses.py`), nhãn từ file CSV gốc (`tools/prepare_gmdcsa24.py`).
+
+**Mô hình.** MLP 2 lớp ẩn (64, 32) trên 62 đặc trưng mỗi khung: 17 khớp chuẩn hoá theo khung người, góc thân, W/H,
+độ co ngắn thân/chân so với bề rộng vai, hông hạ và khung người thấp đi so với lần đứng gần nhất, tốc độ hạ, mức cử động.
+Tăng dữ liệu bằng lật ngang. Huấn luyện bằng scikit-learn, xuất trọng số ra `models/fall_mlp.npz` (52 KB), chạy bằng numpy.
+D thay bước "khung này có đang nằm không" của B; máy trạng thái giữ nguyên.
+
+**Chia dữ liệu (theo người, không trộn):** train = GMDCSA24 người 1–3 + UR val, test_cu · test = GMDCSA24 người 4 + UR test.
+Ngưỡng 0,2 và tổ hợp luật chọn bằng **kiểm tra chéo trên train** (bỏ ra từng người), không nhìn tập test.
+
+**Kiểm tra chéo trên train (72 cú ngã):** B demo 52/11/20 (F1 0,77) · B không luật 59/38/13 (0,70) · **D + mép ảnh 55/4/17 (0,84)**.
+
+**Test — chạy một lần (TP/FP/FN):**
+
+| Cấu hình | GMDCSA24 người 4 | UR test | Tổng P / R / F1 |
+|---|---|---|---|
+| B · demo (cúi + mép + nằm yên) | 10/5/7 | 8/1/2 | 0,75 / 0,67 / 0,71 |
+| B · cúi + mép ảnh | 14/6/3 | 8/1/2 | 0,76 / 0,81 / **0,79** |
+| D · mép ảnh | 11/2/6 | 7/1/3 | **0,86** / 0,67 / 0,75 |
+| D · mép ảnh + nằm yên | 10/2/7 | 6/0/4 | 0,89 / 0,59 / 0,71 |
+
+Riêng **ngã xuống sàn** (bỏ 11 video ngã xuống giường; 16 cú ngã, 30 video sinh hoạt): B demo 13/6/3 (P 0,68, R 0,81, F1 0,74) ·
+**D + mép ảnh 12/3/4 (P 0,80, R 0,75, F1 0,77)**.
+
+**Nhận xét.**
+- D **giảm báo nhầm khoảng một nửa** (nhất là nằm ngủ trên giường, nhặt đồ dưới sàn), đổi lại sót nhiều hơn B một chút.
+- D sót gần hết các cú **ngã xuống giường**, vì dữ liệu gán "ngã xuống giường" là ngã nhưng "nằm ngủ trên giường" là không ngã —
+  với khung xương hai việc gần như giống nhau. D học cách coi nằm trên giường là an toàn.
+- Luật "nằm yên mới báo" làm giảm recall trên cả hai bộ dữ liệu vì clip hết ngay sau khi ngã; trên webcam (người nằm lâu) nó chỉ làm báo chậm hơn.
+- Cả B và D vẫn báo nhầm video chống đẩy (GMDCSA24 người 4, ADL 06): dữ liệu có quá ít video chống đẩy để D học được.
+- Chênh lệch giữa các cấu hình chỉ 1–4 video trên 27 cú ngã, nên **chưa thể kết luận D tốt hơn B**; ưu điểm rõ ràng của D là precision.
+
+**Áp dụng.** Cấu hình demo giữ phương pháp B (đã kiểm chứng trên webcam). D chạy bằng `--method D` để so sánh trực tiếp.
+Tái lập: `python tools/train_fall_model.py --train cache_gmd:data/labels_gmd.csv:train_gmd cache_416:data/labels.csv:val,test_cu --test cache_gmd:data/labels_gmd.csv:test_gmd cache_416:data/labels.csv:test`

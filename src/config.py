@@ -40,6 +40,8 @@ class DetectorConfig:
     still_window: float = 1.0      # cửa sổ đo mức cử động (giây)
     bend_guard: bool = False       # thân ngang + chân dựng đứng + hông chưa hạ (< bend_hip_drop) → đang cúi, không phải nằm
     bend_hip_drop: float = 0.15    # hông hạ so với lúc đứng gần nhất, theo chiều dài người
+    learned_model: str = "models/fall_mlp.npz"  # phương pháp D: trọng số mạng nơ-ron (tools/train_fall_model.py)
+    learned_thresh: float = 0.5    # D: xác suất "đang nằm" tối thiểu
     edge_guard: bool = False       # người bị cắt ở mép ảnh, không thấy cổ chân → không kết luận "nằm" (demo webcam: true)
     support_drop: float = 0.0      # B/C: luật chống tay (chống đẩy). Cổ tay thấp hơn vai >= giá trị này × body_len, chạm sàn → không tính là nằm. 0 = tắt (đã thử 26/10, không hiệu quả trên webcam thật)
     support_memory: float = 1.5    # cửa sổ xét chống tay (giây)

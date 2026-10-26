@@ -35,6 +35,8 @@ detector:
   still_window: 1.0
   bend_guard: true             # cúi người: chân dựng đứng + hông chưa hạ so với lúc đứng → không phải nằm
   bend_hip_drop: 0.15
+  learned_model: models/fall_mlp.npz   # phương pháp D (học máy): chạy với --method D
+  learned_thresh: 0.2          # ngưỡng của D, chọn bằng kiểm tra chéo trên tập train
   edge_guard: true             # người bị cắt ở mép ảnh (đứng sát webcam), không thấy cổ chân → không coi là nằm
   ratio_fallback: false        # thiếu vai/hông (ngồi sát webcam) thì không đoán bằng W/H → tránh báo nhầm
   support_drop: 0.0            # luật chống tay: đã thử 26/10, KHÔNG chặn được chống đẩy trên webcam thật → tắt (xem PHAN_TICH_KET_QUA.md)

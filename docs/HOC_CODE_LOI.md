@@ -389,6 +389,24 @@ Cảnh báo phải đến trong 1 s sau khi kết thúc cú ngã mới tính là
 
 ---
 
+## Phần mở rộng · Phương pháp D (học máy) — TV4 trình bày, cả nhóm nắm ý chính
+
+**Ý tưởng một câu:** thay vì tự đặt ngưỡng góc 45°, cho một mạng nơ-ron nhỏ **học** từ 160 video công khai (GMDCSA24) + UR Fall xem khung xương nào là "đang nằm sau ngã".
+
+- **Đầu vào** (`src/learned.py`, 62 số mỗi khung): toạ độ 17 khớp chuẩn hoá theo khung người, góc thân, W/H, độ co ngắn thân/chân, hông hạ và khung thấp đi so với lúc đứng, tốc độ hạ, mức cử động.
+- **Mô hình:** MLP 2 lớp ẩn (64, 32 nơ-ron, ReLU), đầu ra sigmoid = xác suất "đang nằm". Huấn luyện bằng scikit-learn, lưu trọng số ra `models/fall_mlp.npz`; lúc chạy chỉ là vài phép nhân ma trận numpy.
+- **Tăng dữ liệu:** lật ngang khung xương (đổi trái ↔ phải) để mô hình không lệch về một bên.
+- **Đánh giá trung thực:** chia theo **người** (người 4 chỉ dùng để test), ngưỡng 0,2 chọn bằng kiểm tra chéo trên train.
+
+| Câu hỏi | Gợi ý trả lời |
+|---|---|
+| Vì sao chia theo người mà không chia ngẫu nhiên theo khung? | Các khung liên tiếp của cùng một người gần giống nhau; chia ngẫu nhiên thì test "nhìn thấy" người đó lúc train → điểm cao giả |
+| D có tốt hơn B không? | D giảm báo nhầm khoảng một nửa (precision 0,86 so với 0,75) nhưng sót nhiều hơn một chút; chênh 1–4 video nên chưa kết luận được D tốt hơn |
+| Vì sao D sót ngã xuống giường? | Dữ liệu gán ngã xuống giường là ngã, nằm ngủ trên giường là không ngã; khung xương hai việc giống nhau nên D học coi nằm trên giường là an toàn |
+| Sao không train lại YOLO? | Bài toán là phân loại tư thế, không phải tìm người; học trên khung xương cần ít dữ liệu, chạy nhanh trên CPU |
+
+---
+
 ## Câu hỏi chung — ai cũng có thể bị hỏi
 
 | Câu hỏi | Gợi ý trả lời |

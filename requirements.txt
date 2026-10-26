@@ -8,3 +8,5 @@ streamlit>=1.36
 pandas>=2.0
 matplotlib>=3.7
 pytest>=7.0
+# Chỉ cần khi huấn luyện lại phương pháp D (tools/train_fall_model.py); chạy D chỉ cần numpy:
+# scikit-learn>=1.3

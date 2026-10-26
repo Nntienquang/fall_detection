@@ -33,6 +33,8 @@ detector:
   still_window: 1.0
   bend_guard: false            # true: thân ngang nhưng chân dựng đứng, hông chưa hạ → đang cúi (demo webcam bật)
   bend_hip_drop: 0.15
+  learned_model: models/fall_mlp.npz   # phương pháp D (học máy) — tools/train_fall_model.py
+  learned_thresh: 0.2
   edge_guard: false            # true: người bị cắt ở mép ảnh, không thấy cổ chân → không coi là nằm (demo webcam bật)
   ratio_fallback: true         # B/C: thiếu vai/hông thì dùng W/H thay góc thân (demo webcam: đặt false)
   support_drop: 0.0            # luật chống tay/chống đẩy (0 = tắt — giữ nguyên thí nghiệm UR Fall; demo webcam bật 0.25)

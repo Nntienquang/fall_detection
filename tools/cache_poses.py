@@ -52,18 +52,19 @@ def main():
             continue
         tracker.reset()
         src = VideoSource(str(path))
-        frames, infer = [], []
+        frames, infer, shape = [], [], None
         t0 = time.perf_counter()
         while True:
             ok, frame, t = src.read()
             if not ok:
                 break
+            shape = shape or frame.shape[:2]
             people = tracker(frame)
             infer.append(tracker.last_infer_ms)
             frames.append({"t": round(t, 4), "people": [p.to_json() for p in people]})
         src.release()
         med = statistics.median(infer) if infer else 0.0
-        save_cache(out, video, src.fps, frames, med)
+        save_cache(out, video, src.fps, frames, med, shape)
         print(f"[{i}/{len(labels)}] {video}: {len(frames)} frame, {med:.0f} ms/frame, "
               f"{time.perf_counter() - t0:.0f}s → {out}")
 

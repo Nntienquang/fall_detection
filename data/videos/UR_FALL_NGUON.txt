@@ -1,0 +1,13 @@
+Video ur_fall-*.mp4 va ur_adl-*.mp4 lay tu UR Fall Detection Dataset (camera 0),
+https://fenix.ur.edu.pl/~mkepski/ds/uf.html
+Da cat lay nua anh mau (RGB, 320x240, 30 fps), bo nua anh do sau ben trai.
+Giay phep: CC BY-NC-SA 4.0, chi dung cho hoc tap/nghien cuu phi thuong mai.
+Trich dan bat buoc trong bao cao:
+  B. Kwolek, M. Kepski, "Human fall detection on embedded platform using depth maps
+  and wireless accelerometer", Computer Methods and Programs in Biomedicine,
+  vol. 117, no. 3, pp. 489-501, 2014.
+Nhan (data/labels.csv) do nhom ghi tay: fall_start = luc bat dau mat thang bang,
+fall_end = cham san + 1 giay (hoac het clip).
+LUU Y: clip bi cat ngan, nhieu clip ket thuc ~1 giay sau khi cham san.
+Voi confirm_time = 1.5 s co the bo sot vi het video truoc khi kip xac nhan.
+Hay chay tools/tune.py (luoi co confirm_time 1.0) truoc khi danh gia.

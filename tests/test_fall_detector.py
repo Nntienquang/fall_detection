@@ -305,3 +305,37 @@ def test_real_fall_still_alarms_with_all_webcam_rules():
         det = FallDetector(cfg)
         alerts = [e for t, ps in frames for e in det.update(ps, t, (480, 640))[1] if e.kind == "FALL"]
         assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1
+
+
+# ---------------------------- phương pháp D (học máy) ---------------------------- #
+def _tiny_model(path, lying_weight=8.0):
+    """Mô hình giả lập 1 lớp: xác suất nằm tăng theo góc thân (đặc trưng 'angle', vị trí 51)."""
+    from src.learned import N_FEATURES
+    W = np.zeros((N_FEATURES, 1))
+    W[51, 0] = lying_weight
+    np.savez(path, mean=np.zeros(N_FEATURES), scale=np.ones(N_FEATURES), n_layers=np.array(1),
+             W0=W, b0=np.array([-lying_weight * 0.6]))
+
+
+def test_learned_model_runs_and_detects_fall(tmp_path):
+    path = tmp_path / "m.npz"
+    _tiny_model(path)
+    cfg = replace(CFG, method="D", learned_model=str(path), confirm_time=0.5)
+    frames, falls = scenario("fall", seed=1)
+    det = FallDetector(cfg)
+    alerts = [e for t, ps in frames for e in det.update(ps, t)[1] if e.kind == "FALL"]
+    assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1
+    det = FallDetector(cfg)
+    walk, _ = scenario("walk", seed=1)
+    assert [e for t, ps in walk for e in det.update(ps, t)[1] if e.kind == "FALL"] == []
+
+
+def test_learned_features_flip_is_consistent():
+    from src.learned import N_FEATURES, static_features
+    k = skeleton(300, 300, 200, 70)
+    p = to_person(1, k)
+    a = static_features(p.bbox, p.keypoints, p.kp_conf, 0.35, False)
+    b = static_features(p.bbox, p.keypoints, p.kp_conf, 0.35, False, flip=True)
+    assert a.shape == (N_FEATURES - 5,)
+    assert np.allclose(a[51:], b[51:])                       # góc thân, W/H… không đổi khi lật
+    assert np.allclose(np.sort(a[:34:2]), np.sort(-b[:34:2]))  # toạ độ x đổi dấu
