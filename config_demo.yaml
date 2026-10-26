@@ -30,6 +30,4 @@ detector:
   reassoc_dist: 0.6
   dup_overlap: 0.6
   ratio_fallback: false        # thiếu vai/hông (ngồi sát webcam) thì không đoán bằng W/H → tránh báo nhầm
-  support_drop: 0.25           # chống tay (chống đẩy, bò): cổ tay chạm sàn, thấp hơn vai >= 25% chiều dài người → không phải nằm
-  support_memory: 1.5          # cửa sổ xét chống tay (giây) — che pha thấp của mỗi nhịp chống đẩy
-  support_ratio: 0.3
+  support_drop: 0.0            # luật chống tay: đã thử 26/10, KHÔNG chặn được chống đẩy trên webcam thật → tắt (xem PHAN_TICH_KET_QUA.md)

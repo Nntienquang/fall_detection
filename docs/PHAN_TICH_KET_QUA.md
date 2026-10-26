@@ -89,32 +89,22 @@ Thay đổi theo từng video:
 
 ## Bổ sung 26/10 — Báo nhầm khi chống đẩy (phát hiện khi test webcam)
 
-**Hiện tượng.** Chống đẩy trước webcam → cảnh báo FALL (góc thân 81°, W/H 0,77). Phương pháp B chỉ nhìn tư thế
-thân trong từng khung, mà chống đẩy và nằm sau ngã đều có thân nằm ngang → báo nhầm là đúng với thiết kế của B.
+**Hiện tượng.** Chống đẩy trước webcam → cảnh báo FALL (góc thân 81–90°). Phương pháp B chỉ nhìn tư thế thân
+trong từng khung; chống đẩy và nằm sau ngã đều có thân nằm ngang → báo nhầm là đúng với thiết kế của B.
 
-**Đặc trưng phân biệt (`arm_drop`, src/features.py).** Khi chống tay, cổ tay ở ngay dưới vai (tay lệch phương
-thẳng đứng ≤ 35°), chạm sàn (sát đáy khung người) và thấp hơn vai ≥ 25% chiều dài người. Người nằm bẹp sau ngã
-thì vai và cổ tay gần cùng độ cao → `arm_drop` ≈ 0 (đã kiểm tra ở giai đoạn nằm của các video ngã UR Fall).
+**Đã thử: luật "chống tay"** (`arm_drop` trong src/features.py, `support_*` trong config): khi cổ tay chạm sàn
+ngay dưới vai và thấp hơn vai rõ rệt thì coi là đang tự đỡ người, không phải nằm. Ngoại lệ: vừa có cú hạ hông nhanh
+→ coi là ngã sấp chống tay (để không mất các cú ngã như ur_fall-05, 09).
 
-**Luật thời gian (src/fall_detector.py).**
-- Khung đang chống tay → không tính là "nằm".
-- Pha thấp của nhịp chống đẩy (ngực sát sàn) vẫn coi là chống nếu ≥ 30% khung trong 1,5 s gần nhất có chống tay.
-- Ngoại lệ: vừa có cú hạ hông nhanh (≤ 1,2 s) → đang ngã sấp chống tay, vẫn tính là nằm.
+- Trên UR Fall (cấu hình demo, ảnh 320): không mất cú ngã nào, không thêm báo nhầm, cảnh báo chậm hơn ~0,3 s.
+- Hai phiên bản đầu bị loại vì làm mất cú ngã thật (F1 tập test tụt 0,74 → 0,57).
+- **Trên webcam thật: KHÔNG chặn được** — 3/3 lần chống đẩy vẫn bị báo (run_20261026_101941, ảnh 320).
+  Nguyên nhân: (1) chủ động nằm xuống chống đẩy cũng làm hông hạ nhanh → rơi vào ngoại lệ "đang ngã";
+  (2) ở ảnh 320, YOLO bắt cổ tay kém khi người sát sàn; (3) chống đẩy quay mặt vào camera: thân bị co ngắn, tay chồng lên thân.
+  Bài kiểm thử mô phỏng đã cho người hạ xuống chậm nên không phát hiện ra vấn đề này.
 
-**Hai phiên bản đầu bị loại** vì làm mất cú ngã thật: tay buông thõng lúc đang rơi và ngã sấp chống tay
-(ur_fall-05, 09) trông giống chống đẩy trong ~0,3 s. Phiên bản đầu làm F1 tập test của cấu hình demo tụt 0,74 → 0,57.
-
-**Kết quả (ảnh 320, giữ frame cuối 2 s, cấu hình demo B):**
-
-| Tập | Trước (TP/FP/FN, trễ) | Sau |
-|---|---|---|
-| val | 5/3/0, 1,04 s | 5/3/0, 1,28 s |
-| test_cu | 5/2/0, 0,70 s | 5/2/0, 1,22 s |
-| test | 7/2/3, 0,64 s | 7/2/3, 0,93 s |
-
-Không mất cú ngã nào, không thêm báo nhầm; đánh đổi là cảnh báo chậm hơn ~0,3–0,5 s ở các cú ngã sấp chống tay.
-Kiểm thử: `test_pushup_does_not_alarm`, `test_hand_catch_fall_still_alarms` (22/22 passed).
-
-**Phạm vi.** Luật chỉ bật trong `config_demo.yaml` (`support_drop: 0.25`); thí nghiệm chính A/B/C giữ nguyên
-(`support_drop: 0`), nên các bảng ở trên không đổi. Hạn chế còn lại: giữ tư thế pha thấp > 1,5 s, hoặc ngã xong
-nằm chống tay (bò) sẽ không được tính là nằm.
+**Kết luận.** Luật đã tắt (`support_drop: 0`). Đây là **hạn chế của phương pháp dựa trên tư thế 2D**: chống đẩy,
+ngã sấp chống tay, nằm tập thể dục có hình học gần giống nhau, chỉ khác ở ý định của người.
+Hướng giải quyết: (1) chỉ cảnh báo khi người nằm **bất động** thêm 2–3 s sau khi ngã (người ngã thường nằm yên,
+chống đẩy thì chuyển động liên tục) — đổi lại cảnh báo chậm hơn; (2) học phân loại từ chuỗi keypoint (LSTM, ST-GCN)
+với dữ liệu tự quay có các động tác dễ nhầm.
