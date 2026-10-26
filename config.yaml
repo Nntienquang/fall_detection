@@ -29,6 +29,9 @@ detector:
   track_ttl: 3.0               # giữ lịch sử track đã mất dấu (giây) để nối lại ID
   reassoc_dist: 0.6            # khoảng cách tâm (theo chiều dài cơ thể) để nối ID mới với ID cũ
   dup_overlap: 0.6             # 2 khung chồng nhau >= 60% = cùng 1 người, bỏ khung trùng (1.0 = tắt)
+  still_thresh: 0.0            # > 0: chỉ báo khi nằm yên (vai dịch < still_thresh × chiều dài người trong still_window s); demo webcam: 0.12
+  still_window: 1.0
+  edge_guard: false            # true: người bị cắt ở mép ảnh, không thấy cổ chân → không coi là nằm (demo webcam bật)
   ratio_fallback: true         # B/C: thiếu vai/hông thì dùng W/H thay góc thân (demo webcam: đặt false)
   support_drop: 0.0            # luật chống tay/chống đẩy (0 = tắt — giữ nguyên thí nghiệm UR Fall; demo webcam bật 0.25)
   support_memory: 1.5          # cửa sổ xét chống tay (giây)

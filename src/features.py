@@ -34,6 +34,8 @@ class PoseFeatures:
     body_len: float             # thước đo kích thước người (pixel), dùng chuẩn hoá chuyển động
     n_valid: int                # số keypoint đủ tin cậy
     arm_drop: float = 0.0       # cổ tay thấp hơn vai bao nhiêu (theo body_len), chỉ tính tay gần thẳng đứng
+    truncated: bool = False     # người bị cắt ở mép ảnh (chạm mép + không thấy cổ chân) → khung xương không đáng tin
+    anchor: tuple[float, float] | None = None  # trung điểm vai (không thấy vai thì tâm khung) — dùng đo mức cử động
 
     @property
     def valid(self) -> bool:
@@ -111,4 +113,10 @@ def compute_features(bbox: np.ndarray, kps: np.ndarray, conf: np.ndarray, kp_thr
         body_len=body_len,
         n_valid=int((conf >= kp_thr).sum()),
         arm_drop=arm_drop(kps, conf, kp_thr, body_len, bbox),
+        anchor=_anchor(kps, conf, kp_thr, ((x1 + x2) / 2.0, (y1 + y2) / 2.0)),
     )
+
+
+def _anchor(kps, conf, thr, fallback):
+    sh = _mid(kps, conf, L_SHOULDER, R_SHOULDER, thr)
+    return (float(sh[0]), float(sh[1])) if sh is not None else fallback

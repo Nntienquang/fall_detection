@@ -215,3 +215,61 @@ def test_hand_catch_fall_still_alarms():
             p = to_person(p.track_id, k)
         alerts += [e for e in det.update([p], t)[1] if e.kind == "FALL"]
     assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1
+
+
+def test_close_person_cut_at_frame_edge_does_not_alarm():
+    """Lỗi thật trên webcam 26/10: người đứng sát webcam cúi ~45°, bị cắt mất nửa dưới ở mép phải/dưới
+    ảnh 640x480 → bị báo FALL. edge_guard: chạm mép + không thấy cổ chân → không kết luận 'nằm'."""
+    demo = replace(CFG, method="B", angle_thresh=45.0, confirm_time=0.5, ratio_fallback=False)
+    results = {}
+    for guard in (False, True):
+        det = FallDetector(replace(demo, edge_guard=guard))
+        alerts = []
+        for i in range(105):                       # 1.5 s đứng thẳng rồi 2 s cúi người 50°
+            t = i / 30
+            p = to_person(1, skeleton(560, 420, 500, 0 if t < 1.5 else 50), L=500)
+            p.bbox = np.clip(p.bbox, 0, [639, 479, 639, 479])   # bị cắt ở mép ảnh
+            p.kp_conf[15:] = 0.0                                 # cổ chân ngoài khung
+            alerts += [e for e in det.update([p], t, (480, 640))[1] if e.kind == "FALL"]
+        results[guard] = len(alerts)
+    assert results[False] >= 1, "không bật edge_guard thì ca này phải bị báo nhầm (test có ý nghĩa)"
+    assert results[True] == 0
+
+
+def test_lying_person_with_feet_visible_still_alarms_with_edge_guard():
+    frames, falls = scenario("fall", seed=1)
+    det = FallDetector(replace(CFG, method="B", edge_guard=True))
+    alerts = [e for t, ps in frames for e in det.update(ps, t, (480, 640))[1] if e.kind == "FALL"]
+    assert len(alerts) == 1
+
+
+DEMO_STILL = replace(CFG, method="B", angle_thresh=45.0, ratio_thresh=1.0, confirm_time=0.5,
+                     ratio_fallback=False, still_thresh=0.12)
+
+
+def test_pushup_moving_does_not_alarm_with_still_check():
+    """Chống đẩy: thân nằm ngang nhưng vai lên xuống liên tục → chờ nằm yên, không báo."""
+    for still, expect_alarm in ((0.0, True), (0.12, False)):
+        det = FallDetector(replace(DEMO_STILL, still_thresh=still))
+        alerts = [e for t, ps in _pushup_frames() for e in det.update(ps, t)[1] if e.kind == "FALL"]
+        assert bool(alerts) == expect_alarm
+
+
+def test_real_fall_still_alarms_with_still_check():
+    """Ngã rồi nằm yên → vẫn báo, chậm hơn khoảng 1 s (chờ đủ cửa sổ bất động)."""
+    for seed in (1, 2, 3):
+        frames, falls = scenario("fall", seed=seed)
+        det = FallDetector(DEMO_STILL)
+        alerts = [e for t, ps in frames for e in det.update(ps, t)[1] if e.kind == "FALL"]
+        assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1
+
+
+def test_still_check_cancels_when_person_gets_up():
+    """Đang chờ nằm yên mà người đứng dậy → huỷ, không báo."""
+    det = FallDetector(DEMO_STILL)
+    alerts = []
+    for t, ps in _pushup_frames():
+        if t > 6.0:   # chống đẩy xong thì đứng dậy
+            ps = [to_person(1, skeleton(300, 300, 200, 0))]
+        alerts += [e for e in det.update(ps, t)[1] if e.kind == "FALL"]
+    assert alerts == []

@@ -51,7 +51,7 @@ Trong terminal VS Code:
 python -m pytest -q
 python tools/check_setup.py --name "Ho Ten Cua Ban" --webcam
 ```
-- Lệnh 1 phải ra **20 passed**.
+- Lệnh 1 phải ra **27 passed**.
 - Lệnh 2 kiểm tra thư viện, YOLO trên video test, webcam; in **ĐẠT / CHƯA ĐẠT** và lưu `setup_reports/<ten>.md`. Gửi file này vào nhóm.
 
 ## Bước 6 — Chạy thử hệ thống

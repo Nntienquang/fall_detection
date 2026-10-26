@@ -114,7 +114,7 @@ if run:
             if not ok:
                 break
             people = tracker(frame)
-            results, events = detector.update(people, t)
+            results, events = detector.update(people, t, frame.shape[:2])
             dt = time.perf_counter() - t0
             fps = 1 / dt if fps == 0 else 0.9 * fps + 0.1 / max(dt, 1e-6)
 

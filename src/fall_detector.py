@@ -38,8 +38,10 @@ class _Track:
     last_descent_t: float | None = None
     last_fast_t: float | None = None
     support_hist: deque = field(default_factory=lambda: deque(maxlen=90))  # (t, có chống tay) khi thân ngang
+    motion_hist: deque = field(default_factory=lambda: deque(maxlen=150))  # (t, x vai, y vai, body_len)
     susp_frames: int = 0
     susp_horiz: int = 0
+    await_still: bool = False   # đã đủ điều kiện nằm, đang chờ người nằm yên (still_thresh)
     last_alert_t: float = -1e9
     last_seen: float = 0.0
     last_center: tuple[float, float] = (0.0, 0.0)
@@ -58,8 +60,13 @@ class FallDetector:
     def reset(self) -> None:
         self.tracks.clear()
 
-    def is_horizontal(self, f: PoseFeatures) -> bool:
+    def is_horizontal(self, f: PoseFeatures) -> bool | None:
+        """True = nằm ngang, False = thẳng người, None = không đủ thông tin để kết luận."""
         c = self.cfg
+        if c.edge_guard and f.truncated:
+            # Người bị cắt mất nửa dưới ở mép ảnh (vd đứng sát webcam cúi người): khung và góc thân
+            # chỉ phản ánh phần nhìn thấy → KHÔNG RÕ: không tính là nằm, cũng không tính là đã đứng dậy.
+            return None
         if c.method == "A":
             return f.aspect_ratio > c.ratio_thresh
         if f.torso_angle is None:
@@ -69,8 +76,10 @@ class FallDetector:
         return f.torso_angle > c.angle_thresh
 
     # ------------------------------------------------------------------ #
-    def update(self, people: list[Person], t: float) -> tuple[list[TrackResult], list[FallEvent]]:
-        """Cập nhật với toàn bộ người trong 1 frame tại thời điểm t (giây)."""
+    def update(self, people: list[Person], t: float,
+               frame_shape: tuple[int, int] | None = None) -> tuple[list[TrackResult], list[FallEvent]]:
+        """Cập nhật với toàn bộ người trong 1 frame tại thời điểm t (giây).
+        frame_shape = (cao, rộng) của ảnh — cần cho edge_guard; không truyền thì bỏ qua kiểm tra mép."""
         results: list[TrackResult] = []
         events: list[FallEvent] = []
         people = self._drop_duplicates(people)
@@ -78,6 +87,8 @@ class FallDetector:
 
         for p in people:
             f = compute_features(p.bbox, p.keypoints, p.kp_conf, self.cfg.kp_conf)
+            if frame_shape is not None:
+                f.truncated = self._truncated(p, frame_shape)
             if not f.valid:
                 continue
             tr = self._get_track(p.track_id, f, t, current_ids)
@@ -97,6 +108,15 @@ class FallDetector:
         ih = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
         area = lambda r: max((r[2] - r[0]) * (r[3] - r[1]), 1e-6)
         return iw * ih / min(area(a), area(b))
+
+    def _truncated(self, p: Person, frame_shape) -> bool:
+        """Khung người chạm mép ảnh (trong 2%) VÀ không thấy cổ chân nào → bị cắt mất nửa dưới."""
+        h, w = frame_shape[:2]
+        x1, y1, x2, y2 = p.bbox
+        m = 0.02
+        touch = x1 <= m * w or y1 <= m * h or x2 >= (1 - m) * w or y2 >= (1 - m) * h
+        ankles = max(p.kp_conf[15], p.kp_conf[16]) >= self.cfg.kp_conf
+        return bool(touch and not ankles)
 
     def _drop_duplicates(self, people: list[Person]) -> list[Person]:
         """YOLO đôi khi trả 2 khung cho cùng 1 người đang nằm, ByteTrack gán ID mới cho khung thứ 2.
@@ -149,16 +169,38 @@ class FallDetector:
         speed = max((recent[-1][1] - recent[0][1]) / scale / dt, 0.0)
         return drop, speed
 
+    def _confirm(self, tr: _Track, tid: int, f: PoseFeatures, t: float) -> FallEvent | None:
+        """SUSPECTED → FALL, phát cảnh báo (trừ khi vừa báo cho người này trong alert_cooldown)."""
+        self._set(tr, State.FALL, t)
+        if t - tr.last_alert_t < self.cfg.alert_cooldown:
+            return None
+        tr.last_alert_t = t
+        return FallEvent(t, tid, "FALL", f.torso_angle, f.aspect_ratio, f"method={self.cfg.method}")
+
+    def _motion(self, tr: _Track, t: float) -> float:
+        """Mức cử động trong still_window giây gần nhất: biên độ dịch chuyển lớn nhất của vai
+        (max - min theo x hoặc y), chia chiều dài cơ thể. Chưa đủ dữ liệu → vô cùng (coi như còn cử động)."""
+        win = [m for m in tr.motion_hist if t - m[0] <= self.cfg.still_window]
+        if len(win) < 3 or win[-1][0] - win[0][0] < 0.8 * self.cfg.still_window:
+            return float("inf")
+        xs, ys = [m[1] for m in win], [m[2] for m in win]
+        scale = float(np.median([m[3] for m in win]))
+        return max(max(xs) - min(xs), max(ys) - min(ys)) / max(scale, 1.0)
+
     def _set(self, tr: _Track, s: State, t: float) -> None:
         tr.state, tr.state_since = s, t
         tr.susp_frames = tr.susp_horiz = 0
+        tr.await_still = False
 
     def _step(self, tid: int, tr: _Track, f: PoseFeatures, t: float):
         c = self.cfg
         tr.history.append((t, f.hip_y, f.body_len))
+        tr.motion_hist.append((t, f.anchor[0], f.anchor[1], f.body_len))
         tr.last_seen, tr.last_center, tr.last_len = t, f.center, f.body_len
 
-        horizontal = self.is_horizontal(f)
+        h = self.is_horizontal(f)
+        unknown = h is None
+        horizontal = bool(h)
         drop, speed = self._descent(tr, t)
         tr.speed = speed
         if speed >= c.min_descent_speed:
@@ -185,7 +227,9 @@ class FallDetector:
                 supported = len(hits) >= 2 and len(hits) / len(recent) >= c.support_ratio
         lying = horizontal and not supported
 
-        if horizontal:
+        if unknown:
+            pass  # không rõ tư thế → giữ nguyên bộ đếm đứng/nằm
+        elif horizontal:
             tr.upright_since = None
         else:
             tr.seen_upright = True
@@ -203,19 +247,22 @@ class FallDetector:
                     self._set(tr, State.SUSPECTED, t)
 
         elif tr.state == State.SUSPECTED:
-            tr.susp_frames += 1
-            tr.susp_horiz += int(lying)
+            if not unknown:
+                tr.susp_frames += 1
+                tr.susp_horiz += int(lying)
             if upright_for >= 0.5:  # đứng dậy ngay → huỷ nghi ngờ
                 self._set(tr, State.NORMAL, t)
+            elif tr.await_still:
+                # Đã nằm đủ lâu; chỉ còn chờ nằm yên. Chống đẩy, bò: còn cử động đều → không báo.
+                if self._motion(tr, t) <= c.still_thresh:
+                    event = self._confirm(tr, tid, f, t)
             elif t - tr.state_since >= c.confirm_time:
-                if tr.susp_horiz / max(tr.susp_frames, 1) >= c.confirm_ratio:
-                    self._set(tr, State.FALL, t)
-                    if t - tr.last_alert_t >= c.alert_cooldown:
-                        tr.last_alert_t = t
-                        event = FallEvent(t, tid, "FALL", f.torso_angle, f.aspect_ratio,
-                                          f"method={c.method}")
-                else:
+                if tr.susp_horiz / max(tr.susp_frames, 1) < c.confirm_ratio:
                     self._set(tr, State.NORMAL, t)
+                elif c.still_thresh > 0 and self._motion(tr, t) > c.still_thresh:
+                    tr.await_still = True
+                else:
+                    event = self._confirm(tr, tid, f, t)
 
         elif tr.state == State.FALL:
             if upright_for >= c.recover_time:

@@ -36,7 +36,10 @@ class DetectorConfig:
     reassoc_dist: float = 0.6
     dup_overlap: float = 0.6
     ratio_fallback: bool = True
-    support_drop: float = 0.0      # B/C: luật chống tay (chống đẩy). Cổ tay thấp hơn vai >= giá trị này × body_len, chạm sàn → không tính là nằm. 0 = tắt; demo webcam: 0.25
+    still_thresh: float = 0.0      # > 0: chỉ xác nhận ngã khi vai cử động < giá trị này × body_len trong still_window giây (0 = tắt)
+    still_window: float = 1.0      # cửa sổ đo mức cử động (giây)
+    edge_guard: bool = False       # người bị cắt ở mép ảnh, không thấy cổ chân → không kết luận "nằm" (demo webcam: true)
+    support_drop: float = 0.0      # B/C: luật chống tay (chống đẩy). Cổ tay thấp hơn vai >= giá trị này × body_len, chạm sàn → không tính là nằm. 0 = tắt (đã thử 26/10, không hiệu quả trên webcam thật)
     support_memory: float = 1.5    # cửa sổ xét chống tay (giây)
     support_ratio: float = 0.3     # pha thấp của chống đẩy: >= 30% khung thân-ngang trong cửa sổ có chống tay → vẫn là chống
 

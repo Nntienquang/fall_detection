@@ -108,3 +108,59 @@ ngã sấp chống tay, nằm tập thể dục có hình học gần giống nh
 Hướng giải quyết: (1) chỉ cảnh báo khi người nằm **bất động** thêm 2–3 s sau khi ngã (người ngã thường nằm yên,
 chống đẩy thì chuyển động liên tục) — đổi lại cảnh báo chậm hơn; (2) học phân loại từ chuỗi keypoint (LSTM, ST-GCN)
 với dữ liệu tự quay có các động tác dễ nhầm.
+
+## Bổ sung 26/10 (2) — Kết quả webcam run_20261026_104803 (ảnh 416, cấu hình demo B)
+
+4 cảnh báo, chia 2 loại:
+
+| Thời điểm | Tình huống | Góc thân | Loại |
+|---|---|---|---|
+| 16,8 s; 28,0 s | Quỳ chống tay (tư thế bò) | 79–81° | Hạn chế của phương pháp — giống ca chống đẩy |
+| 52,6 s; 64,7 s | Người đứng sát webcam cúi người, bị cắt mất nửa dưới ở mép phải/dưới ảnh | 44–47° | **Sửa được** |
+
+**Sửa: `edge_guard`.** Nếu khung người chạm mép ảnh (trong 2%) **và** không thấy cổ chân nào → người bị cắt mất nửa
+dưới, khung xương chỉ phản ánh phần nhìn thấy → không kết luận "nằm". Bật trong `config_demo.yaml`, tắt trong thí nghiệm chính.
+
+- Trên UR Fall (khung 320×240 thật): chỉ 11/996 khung thân-ngang bị ảnh hưởng; số cú ngã bắt được, báo nhầm và
+  độ trễ **giữ nguyên** trên cả val, test_cu, test.
+- Kiểm thử: `test_close_person_cut_at_frame_edge_does_not_alarm` (tắt luật thì báo nhầm, bật thì không),
+  `test_lying_person_with_feet_visible_still_alarms_with_edge_guard`.
+- Đánh đổi: người ngã mà chân nằm ngoài khung hình sẽ không được báo — đặt camera bao quát cả phòng.
+
+**Quỳ chống tay / chống đẩy** vẫn bị báo. Không xử lý bằng thêm luật, vì ngã sấp chống tay trông giống hệt
+(xem mục trên). Ghi vào báo cáo như hạn chế; hướng giải quyết: kiểm tra bất động sau ngã hoặc học theo chuỗi keypoint.
+
+## Bổ sung 26/10 (3) — Luật "nằm yên mới báo" cho chống đẩy, bò
+
+**Ý tưởng.** Người ngã thường nằm yên; chống đẩy, bò thì vai lên xuống liên tục. Sau khi đủ điều kiện nằm
+(`confirm_time`, `confirm_ratio`), hệ thống **chờ đến khi vai dịch chuyển < 12% chiều dài người trong 1 s** rồi mới
+báo (`still_thresh: 0.12`). Đang chờ mà đứng dậy → huỷ.
+
+**Chọn ngưỡng.** Độ rung khung xương khi nằm yên thật (fall-06, 11, 12 — các clip có đủ thời gian nằm): 0,04–0,08.
+Chống đẩy thật: vai dịch khoảng 0,3 chiều dài người. Chọn 0,12 để có khoảng an toàn với độ rung.
+
+**Hai lỗi phát hiện và sửa khi làm luật này:**
+1. Trong lúc chờ nằm yên, tỉ lệ khung nằm ngang bị tính lại liên tục → tụt dưới 70% do góc thân nhiễu lúc đang
+   rơi → huỷ nghi ngờ sớm. Sửa: chỉ kiểm tra tỉ lệ một lần ở mốc `confirm_time`, sau đó chỉ chờ nằm yên.
+2. `edge_guard` coi người bị cắt ở mép ảnh là "đứng thẳng" → có thể huỷ nghi ngờ của người nằm sát mép.
+   Sửa: coi là "không rõ" — không tính là nằm, cũng không tính là đã đứng dậy.
+
+**Kết quả trên UR Fall (cấu hình demo, ảnh 320, có `edge_guard`), TP/FP/FN:**
+
+| Cách giữ khung cuối | Luật | val | test_cu | test | Độ trễ test |
+|---|---|---|---|---|---|
+| Khung cuối 2 s (cách đánh giá chính thức) | không | 5/3/0 | 5/2/0 | 7/2/3 | 0,64 s |
+| | nằm yên 0,12 | 4/1/1 | 3/0/2 | 5/0/5 | 1,95 s |
+| Khung cuối **có người** 2 s | không | 5/3/0 | 5/2/0 | 8/2/2 | 0,68 s |
+| | nằm yên 0,12 | 5/1/0 | 4/1/1 | 7/1/3 | 1,80 s |
+
+- Báo nhầm giảm rõ (tổng 7 → 3 hoặc 1). Chống đẩy mô phỏng không còn bị báo.
+- Đổi lại sót thêm cú ngã và báo chậm hơn ~1,2 s. Phần lớn số sót là do **clip UR bị cắt quá sớm**: luật cần ≥ 1 s
+  thấy người nằm yên, trong khi nhiều clip hết 0,3–1 s sau khi chạm sàn, khung cuối không còn ai hoặc khung xương sai
+  (fall-07 mất góc thân, fall-15 góc 29°). UR Fall vì vậy **không đánh giá công bằng được luật này** — cần video tự quay
+  có người nằm lại vài giây sau ngã.
+- Vì thế luật chỉ bật trong `config_demo.yaml` (webcam), thí nghiệm chính giữ nguyên (`still_thresh: 0`).
+
+**Hạn chế còn lại:** giữ yên tư thế quỳ chống tay hoặc pha thấp chống đẩy quá ~1,5 s vẫn bị báo; người ngã còn
+giãy giụa sẽ được báo chậm hơn. Kiểm thử: `test_pushup_moving_does_not_alarm_with_still_check`,
+`test_real_fall_still_alarms_with_still_check`, `test_still_check_cancels_when_person_gets_up` (27/27 passed).

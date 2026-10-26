@@ -87,7 +87,11 @@ tools/cache_poses.py    Chạy YOLO 1 lần cho mọi video                     
 tools/tune.py           Grid search ngưỡng trên val                          TV2
 tools/evaluate.py       So sánh A/B/C trên test                              TV4
 tools/plot_features.py  Biểu đồ đặc trưng theo thời gian                     TV2/TV4
-tests/                  17 unit test                                         TV2/TV4
+tests/                  27 unit test                                         TV2/TV4
+docs/HOC_CODE_LOI.md    Học code lõi, câu hỏi bảo vệ, yêu cầu sửa tại chỗ    cả nhóm
+docs/PHAN_TICH_KET_QUA.md  Số liệu, phân tích lỗi, các luật webcam           cả nhóm
+docs/KICH_BAN_DEMO.md   Trình tự demo                                        cả nhóm
+docs/KICH_BAN_VIDEO.md  Kịch bản video giới thiệu (8–10 phút, đủ 4 người)    cả nhóm
 ```
 
 ## 6. Lỗi thường gặp
@@ -95,7 +99,7 @@ tests/                  17 unit test                                         TV2
 - **FPS thấp / webcam trễ:** giảm `--imgsz 256`, thử `--threads` = số nhân thật của CPU; `src/video.py` đã bỏ frame cũ nên không bị trễ tích luỹ.
 - **`lap` lỗi khi cài:** `pip install lap` riêng, hoặc đổi `tracker: botsort.yaml` trong config.
 - **Mất keypoint khi người nằm xa camera:** thử `--imgsz 416`, đặt camera cao 1.5–2.5 m nhìn chéo xuống.
-- **Báo nhầm khi nằm/cúi:** dùng phương pháp C và chỉnh ngưỡng bằng `tools/tune.py`.
+- **Báo nhầm khi nằm/cúi/chống đẩy:** dùng `config_demo.yaml` (chỉ báo khi người nằm yên, bỏ qua người bị cắt ở mép ảnh); đặt camera thấy trọn người.
 
 ## 7. Hạn chế đã biết (ghi vào báo cáo)
 

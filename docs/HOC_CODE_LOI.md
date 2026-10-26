@@ -49,7 +49,7 @@ Ba phương pháp chỉ khác nhau ở **cách quyết định một khung hình
 | Tập test, ảnh 320 | B 0,78; A 0,71; C 0,67 (C không báo nhầm lần nào nhưng sót nhiều) |
 | Tốc độ CPU | ảnh 640 ~13 FPS; ảnh 416 ~21 FPS (36 ms/khung) |
 | Webcam thật | ngã lên đệm 2/2 lần được báo, đứng dậy thì về bình thường |
-| Hạn chế đã biết | chống đẩy bị báo nhầm; ngã thẳng về phía camera; người bị che; người ra khỏi khung (fall-19) |
+| Hạn chế đã biết | giữ yên tư thế quỳ chống tay/chống đẩy lâu vẫn bị báo (đã giảm bằng luật nằm yên); ngã thẳng về phía camera; người bị che; người ra khỏi khung (fall-19) |
 
 ---
 
@@ -167,11 +167,14 @@ return degrees(atan2(abs(dx), abs(dy)))   # 0° = đứng thẳng, 90° = nằm 
 
 ### Code: quyết định "đang nằm" (`is_horizontal`)
 ```python
+if edge_guard and truncated: return False                          # người bị cắt ở mép ảnh → không đoán
 if method == "A":          return aspect_ratio > ratio_thresh      # phương pháp A
 if torso_angle is None:    return ratio_fallback and aspect_ratio > ratio_thresh
 return torso_angle > angle_thresh                                  # B và C (demo: 45°)
 ```
-Khi không thấy vai hoặc hông (ví dụ ngồi sát webcam, chỉ thấy đầu và vai), cấu hình demo đặt `ratio_fallback: false` để không đoán bừa. Thay đổi này không làm đổi kết quả trên UR Fall, nhưng tránh được báo nhầm khi demo.
+Hai luật chống báo nhầm khi demo webcam, đều phát hiện từ lỗi thật và đều **không đổi kết quả trên UR Fall**:
+- `ratio_fallback: false`: không thấy vai hoặc hông (ngồi sát webcam, chỉ thấy đầu và vai) thì không đoán bừa bằng W/H.
+- `edge_guard: true`: khung người chạm mép ảnh **và** không thấy cổ chân (người đứng sát webcam cúi xuống, bị cắt mất nửa dưới) thì không kết luận "nằm". Hàm `_truncated` trong `src/fall_detector.py`.
 
 ### Câu hỏi bảo vệ
 | Câu hỏi | Gợi ý trả lời |
@@ -182,6 +185,7 @@ Khi không thấy vai hoặc hông (ví dụ ngồi sát webcam, chỉ thấy đ
 | Ngưỡng 45° lấy ở đâu? | Grid search trên tập val (thử 45–70°), chọn F1 cao nhất. Không chỉnh trên test |
 | Ngã thẳng về phía camera thì sao? | Góc 2D thay đổi ít vì thân đổ theo chiều sâu. Đây là hạn chế đã ghi nhận; cần camera đặt cao, nhiều camera, hoặc dữ liệu độ sâu |
 | Chống đẩy sao lại bị báo? | Trong một khung hình, chống đẩy và nằm sau ngã đều có thân nằm ngang: hình học 2D giống nhau, chỉ khác ý định. Nhóm đã thử luật "chống tay" nhưng không đủ trên webcam thật; hướng xử lý là kiểm tra bất động sau ngã hoặc học theo chuỗi thời gian |
+| Người đứng sát camera cúi xuống có bị báo không? | Trước đây có (góc 44–47°, chỉ thấy nửa trên). Nay có `edge_guard`: chạm mép ảnh mà không thấy cổ chân thì không kết luận nằm. Đánh đổi: người ngã mà chân ra ngoài khung sẽ không được báo |
 | Vì sao chuẩn hóa theo `max(W, H)` mà không theo chiều cao? | Người ngã thì chiều cao khung giảm mạnh, còn cạnh dài nhất gần như giữ nguyên chiều dài cơ thể |
 
 ### Bài tập tay
@@ -244,12 +248,16 @@ NORMAL ──(đang nằm ngang VÀ trước đó từng đứng thẳng)──�
         [C còn đòi: vừa có cú hạ nhanh trong 1,2 s]
 SUSPECTED ──(đứng thẳng lại ≥ 0,5 s)──▶ NORMAL                    (chỉ cúi người)
 SUSPECTED ──(sau confirm_time, ≥ 70% số khung là nằm ngang)──▶ FALL → phát cảnh báo
+        [demo webcam: còn đòi vai NẰM YÊN — dịch < 12% thân người trong 1 s (`_motion`)]
 FALL ──(đứng thẳng ≥ 2 s)──▶ NORMAL, phát sự kiện RECOVERED
 ```
-Ba chi tiết hay bị hỏi:
+Đo mức cử động (`_motion`): biên độ dịch chuyển lớn nhất của trung điểm vai trong 1 s gần nhất (max − min theo x hoặc y), chia chiều dài người. Nằm yên thật chỉ rung 0,04–0,08 (nhiễu keypoint); chống đẩy khoảng 0,3. Đây là cách xử lý chống đẩy, bò.
+
+Bốn chi tiết hay bị hỏi:
 - `seen_upright`: người **nằm sẵn** từ đầu video không bị báo, vì chưa từng thấy họ đứng.
 - `confirm_ratio = 0.7`: cho phép 30% số khung nhiễu (keypoint lệch) mà vẫn xác nhận được ngã.
 - `alert_cooldown = 10 s`: một cú ngã chỉ báo **một lần**.
+- Tư thế "không rõ" (người bị cắt ở mép ảnh): không tính là nằm, cũng không tính là đã đứng dậy, để không huỷ nhầm.
 
 ### Câu hỏi bảo vệ
 | Câu hỏi | Gợi ý trả lời |
@@ -261,6 +269,8 @@ Ba chi tiết hay bị hỏi:
 | Vì sao C (có tốc độ) lại kém B trên test? | C cần thêm điều kiện nên thận trọng hơn: không báo nhầm lần nào ở ảnh 320 nhưng bỏ sót nhiều hơn, vì clip UR Fall bị cắt ngay sau khi chạm sàn |
 | Tự nằm xuống giường có bị báo không? | Với B thì có thể. C giảm được nhờ điều kiện tốc độ, nhưng "ngồi phịch xuống rồi nằm" vẫn dễ nhầm (ca adl-10) |
 | Người nằm sẵn trên sàn từ đầu có bị báo không? | Không, nhờ `seen_upright`. Bỏ điều kiện này thì phương pháp B báo ngay sau 0,5 s (yêu cầu 3.3) |
+| Chống đẩy, bò có bị báo không? | Bản demo chờ người **nằm yên** 1 s mới báo; chống đẩy thì vai lên xuống liên tục nên không báo. Đánh đổi: báo chậm hơn ~1 s, và giữ yên tư thế quỳ/chống đẩy quá lâu vẫn bị báo |
+| Sao luật nằm yên không bật trong thí nghiệm chính? | Clip UR Fall hết 0,3–1 s sau khi chạm sàn, chưa đủ 1 s nằm yên nên đánh giá không công bằng (xem PHAN_TICH_KET_QUA.md). Cần video tự quay để đo |
 | Người ngã rồi nằm mãi không dậy thì sao? | Hiện chỉ báo một lần. Có thể thêm cảnh báo mức 2 khi nằm quá N giây (yêu cầu 3.2) |
 
 ### Bài tập tay

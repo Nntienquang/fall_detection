@@ -82,7 +82,7 @@ def main() -> int:
                 break
 
             people = tracker(frame)
-            results, events = detector.update(people, t)
+            results, events = detector.update(people, t, frame.shape[:2])
 
             dt = time.perf_counter() - t_loop
             fps_ema = (1 / dt) if fps_ema == 0 else 0.9 * fps_ema + 0.1 * (1 / max(dt, 1e-6))
