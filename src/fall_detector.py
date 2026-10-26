@@ -37,6 +37,7 @@ class _Track:
     upright_since: float | None = None
     last_descent_t: float | None = None
     last_fast_t: float | None = None
+    support_hist: deque = field(default_factory=lambda: deque(maxlen=90))  # (t, có chống tay) khi thân ngang
     susp_frames: int = 0
     susp_horiz: int = 0
     last_alert_t: float = -1e9
@@ -166,6 +167,24 @@ class FallDetector:
         if drop >= c.drop_thresh and tr.last_fast_t is not None and t - tr.last_fast_t <= c.drop_window:
             tr.last_descent_t = t
 
+        # Chống tay (chống đẩy, bò, đang chống dậy): thân ngang nhưng tay đỡ người → không tính là "nằm".
+        #   - Ngoại lệ: vừa có cú hạ hông NHANH (trong descent_memory giây) → đang ngã sấp chống tay,
+        #     vẫn tính là nằm. Chống đẩy thì người hạ xuống từ từ nên không bị ngoại lệ này.
+        #   - Pha thấp của nhịp chống đẩy (ngực sát sàn, vai gần ngang cổ tay) vẫn được coi là đang chống
+        #     nếu trong support_memory giây gần nhất có >= support_ratio số khung chống tay.
+        supported = False
+        if c.method != "A" and c.support_drop > 0 and horizontal:
+            falling = tr.last_fast_t is not None and t - tr.last_fast_t <= c.descent_memory
+            now = f.arm_drop >= c.support_drop and not falling
+            tr.support_hist.append((t, now))
+            if now:
+                supported = True
+            elif not falling:
+                recent = [(ts, s) for (ts, s) in tr.support_hist if t - ts <= c.support_memory]
+                hits = [ts for ts, s in recent if s]
+                supported = len(hits) >= 2 and len(hits) / len(recent) >= c.support_ratio
+        lying = horizontal and not supported
+
         if horizontal:
             tr.upright_since = None
         else:
@@ -177,7 +196,7 @@ class FallDetector:
         event = None
 
         if tr.state == State.NORMAL:
-            if horizontal and tr.seen_upright:
+            if lying and tr.seen_upright:
                 if c.method in ("A", "B"):
                     self._set(tr, State.SUSPECTED, t)
                 elif tr.last_descent_t is not None and t - tr.last_descent_t <= c.descent_memory:
@@ -185,7 +204,7 @@ class FallDetector:
 
         elif tr.state == State.SUSPECTED:
             tr.susp_frames += 1
-            tr.susp_horiz += int(horizontal)
+            tr.susp_horiz += int(lying)
             if upright_for >= 0.5:  # đứng dậy ngay → huỷ nghi ngờ
                 self._set(tr, State.NORMAL, t)
             elif t - tr.state_since >= c.confirm_time:
@@ -204,7 +223,7 @@ class FallDetector:
                 tr.last_descent_t = None
                 event = FallEvent(t, tid, "RECOVERED", f.torso_angle, f.aspect_ratio)
 
-        res = TrackResult(tid, tr.state, horizontal, f.torso_angle, f.aspect_ratio, speed)
+        res = TrackResult(tid, tr.state, lying, f.torso_angle, f.aspect_ratio, speed)
         return res, event
 
 

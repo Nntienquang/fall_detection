@@ -33,6 +33,7 @@ class PoseFeatures:
     center: tuple[float, float] # tâm bounding box (pixel)
     body_len: float             # thước đo kích thước người (pixel), dùng chuẩn hoá chuyển động
     n_valid: int                # số keypoint đủ tin cậy
+    arm_drop: float = 0.0       # cổ tay thấp hơn vai bao nhiêu (theo body_len), chỉ tính tay gần thẳng đứng
 
     @property
     def valid(self) -> bool:
@@ -63,6 +64,34 @@ def torso_angle(kps: np.ndarray, conf: np.ndarray, thr: float) -> float | None:
     return math.degrees(math.atan2(abs(dx), abs(dy)))
 
 
+ARM_MAX_ANGLE = 35.0  # độ: tay lệch khỏi phương thẳng đứng tối đa để coi là "chống" xuống sàn
+
+
+WRIST_FLOOR = 0.2    # cổ tay cách đáy khung người <= 20% chiều cao khung = đang chạm sàn
+
+
+def arm_drop(kps: np.ndarray, conf: np.ndarray, thr: float, body_len: float, bbox=None) -> float:
+    """Tay chống xuống sàn (chống đẩy, bò, đang chống tay đứng dậy): cổ tay ở ngay dưới vai,
+    thấp hơn vai đáng kể VÀ chạm sàn (sát đáy khung người).
+      - Người nằm bẹp trên sàn: vai và cổ tay gần cùng độ cao → 0.
+      - Người đang rơi, tay buông thõng: cổ tay lơ lửng giữa khung, chưa chạm sàn → 0.
+    Trả về độ chênh lớn nhất giữa 2 tay, chuẩn hoá theo body_len (0 = không chống)."""
+    best = 0.0
+    for sh, wr in ((L_SHOULDER, 9), (R_SHOULDER, 10)):
+        if conf[sh] < thr or conf[wr] < thr:
+            continue
+        dx, dy = float(kps[wr][0] - kps[sh][0]), float(kps[wr][1] - kps[sh][1])
+        if dy <= 0:  # cổ tay cao hơn vai (trục y ảnh hướng xuống)
+            continue
+        if bbox is not None:
+            y1, y2 = float(bbox[1]), float(bbox[3])
+            if (y2 - float(kps[wr][1])) > WRIST_FLOOR * max(y2 - y1, 1e-6):
+                continue  # cổ tay chưa chạm sàn
+        if math.degrees(math.atan2(abs(dx), dy)) <= ARM_MAX_ANGLE:
+            best = max(best, dy / max(body_len, 1e-6))
+    return best
+
+
 def compute_features(bbox: np.ndarray, kps: np.ndarray, conf: np.ndarray, kp_thr: float) -> PoseFeatures:
     x1, y1, x2, y2 = (float(v) for v in bbox)
     w, h = max(x2 - x1, 1e-6), max(y2 - y1, 1e-6)
@@ -81,4 +110,5 @@ def compute_features(bbox: np.ndarray, kps: np.ndarray, conf: np.ndarray, kp_thr
         center=((x1 + x2) / 2.0, (y1 + y2) / 2.0),
         body_len=body_len,
         n_valid=int((conf >= kp_thr).sum()),
+        arm_drop=arm_drop(kps, conf, kp_thr, body_len, bbox),
     )

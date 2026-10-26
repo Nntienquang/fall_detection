@@ -158,3 +158,60 @@ def test_close_up_without_hips_does_not_alarm_when_fallback_off():
         p.bbox = np.array([50.0, 100.0, 600.0, 480.0])
         alerts += det.update([p], i / 30)[1]
     assert alerts == []
+
+
+def _pushup_frames(fps=30, floor=400.0, L=200.0, cx=300.0):
+    """Đứng 1.5 s → từ từ cúi, đặt 2 tay xuống sàn (1.5 s) → chống đẩy 8 s (nhịp 1.5 s/lần).
+    Khi chống đẩy: cổ tay chạm sàn ngay dưới vai; pha thấp gập tay nên vai hạ sát sàn hơn."""
+    frames = []
+    for i in range(int(11 * fps)):
+        t = i / fps
+        if t < 1.5:
+            a, low = 0.0, 0.0
+        elif t < 3.0:
+            a, low = 68.0 * (t - 1.5) / 1.5, 0.0
+        else:
+            low = 0.5 - 0.5 * np.cos(2 * np.pi * (t - 3.0) / 1.5)   # 0 = tay thẳng, 1 = pha thấp
+            a = 68.0 + 14.0 * low
+        rad = np.radians(a)
+        k = skeleton(cx, floor - 0.5 * L * np.cos(rad), L, a)
+        if a > 30:  # tay chống xuống sàn, ngay dưới vai
+            for s, e, w in ((5, 7, 9), (6, 8, 10)):
+                k[w] = [k[s][0], floor]
+                k[e] = (k[s] + k[w]) / 2 + [0.08 * L * low, 0]
+        frames.append((t, [to_person(1, k)]))
+    return frames
+
+
+def test_pushup_does_not_alarm():
+    """Lỗi thật trên webcam 26/10: chống đẩy bị báo té ngã (thân ngang 81°).
+    Tay chống thẳng xuống sàn → đang tự đỡ người, không phải nằm."""
+    demo = replace(CFG, method="B", angle_thresh=45.0, ratio_thresh=1.0,
+                   confirm_time=0.5, ratio_fallback=False, support_drop=0.25)
+    for cfg, expect in ((demo, 0), (replace(demo, support_drop=0.0), None)):
+        det = FallDetector(cfg)
+        alerts = []
+        for t, people in _pushup_frames():
+            alerts += [e for e in det.update(people, t)[1] if e.kind == "FALL"]
+        if expect is None:
+            assert alerts, "khi tắt luật chống tay, kịch bản này phải báo nhầm (kiểm tra test có ý nghĩa)"
+        else:
+            assert alerts == []
+
+
+def test_hand_catch_fall_still_alarms():
+    """Ngã sấp chống tay (ur_fall-05/09): chống tay ~0.3 s ngay sau cú hạ nhanh rồi nằm bẹp → vẫn báo."""
+    frames, falls = scenario("fall", seed=3)
+    det = FallDetector(replace(CFG, method="B", angle_thresh=45.0, confirm_time=0.5, support_drop=0.25))
+    alerts = []
+    t_land = falls[0][0] + 0.6
+    for t, people in frames:
+        p = people[0]
+        if t_land <= t < t_land + 0.3:   # 0.3 s chống tay chạm sàn ngay dưới vai
+            k = p.keypoints.copy()
+            floor = k[:, 1].max() + 0.6 * (k[:, 1].max() - k[:, 1].min() + 40)
+            for s, w in ((5, 9), (6, 10)):
+                k[w] = [k[s][0], floor]
+            p = to_person(p.track_id, k)
+        alerts += [e for e in det.update([p], t)[1] if e.kind == "FALL"]
+    assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1

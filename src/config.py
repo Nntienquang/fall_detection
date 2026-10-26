@@ -36,6 +36,9 @@ class DetectorConfig:
     reassoc_dist: float = 0.6
     dup_overlap: float = 0.6
     ratio_fallback: bool = True
+    support_drop: float = 0.0      # B/C: luật chống tay (chống đẩy). Cổ tay thấp hơn vai >= giá trị này × body_len, chạm sàn → không tính là nằm. 0 = tắt; demo webcam: 0.25
+    support_memory: float = 1.5    # cửa sổ xét chống tay (giây)
+    support_ratio: float = 0.3     # pha thấp của chống đẩy: >= 30% khung thân-ngang trong cửa sổ có chống tay → vẫn là chống
 
 
 @dataclass

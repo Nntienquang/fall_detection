@@ -30,3 +30,6 @@ detector:
   reassoc_dist: 0.6            # khoảng cách tâm (theo chiều dài cơ thể) để nối ID mới với ID cũ
   dup_overlap: 0.6             # 2 khung chồng nhau >= 60% = cùng 1 người, bỏ khung trùng (1.0 = tắt)
   ratio_fallback: true         # B/C: thiếu vai/hông thì dùng W/H thay góc thân (demo webcam: đặt false)
+  support_drop: 0.0            # luật chống tay/chống đẩy (0 = tắt — giữ nguyên thí nghiệm UR Fall; demo webcam bật 0.25)
+  support_memory: 1.5          # cửa sổ xét chống tay (giây)
+  support_ratio: 0.3           # >= 30% khung thân-ngang gần đây có chống tay → pha thấp của chống đẩy vẫn là chống

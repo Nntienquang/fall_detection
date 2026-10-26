@@ -86,3 +86,35 @@ Thay đổi theo từng video:
 - **Nằm trên giường vs. trên sàn:** cần ước lượng mặt sàn (hiệu chỉnh camera) hoặc thông tin độ sâu.
 - **Dữ liệu:** 20 cú ngã là ít; bổ sung video nhóm tự quay và fall-21…30 của UR Fall.
 - **Clip bị cắt:** UR Fall không có đoạn sau khi ngã đủ dài; video tự quay nên ghi tiếp ≥ 5 s sau khi chạm sàn.
+
+## Bổ sung 26/10 — Báo nhầm khi chống đẩy (phát hiện khi test webcam)
+
+**Hiện tượng.** Chống đẩy trước webcam → cảnh báo FALL (góc thân 81°, W/H 0,77). Phương pháp B chỉ nhìn tư thế
+thân trong từng khung, mà chống đẩy và nằm sau ngã đều có thân nằm ngang → báo nhầm là đúng với thiết kế của B.
+
+**Đặc trưng phân biệt (`arm_drop`, src/features.py).** Khi chống tay, cổ tay ở ngay dưới vai (tay lệch phương
+thẳng đứng ≤ 35°), chạm sàn (sát đáy khung người) và thấp hơn vai ≥ 25% chiều dài người. Người nằm bẹp sau ngã
+thì vai và cổ tay gần cùng độ cao → `arm_drop` ≈ 0 (đã kiểm tra ở giai đoạn nằm của các video ngã UR Fall).
+
+**Luật thời gian (src/fall_detector.py).**
+- Khung đang chống tay → không tính là "nằm".
+- Pha thấp của nhịp chống đẩy (ngực sát sàn) vẫn coi là chống nếu ≥ 30% khung trong 1,5 s gần nhất có chống tay.
+- Ngoại lệ: vừa có cú hạ hông nhanh (≤ 1,2 s) → đang ngã sấp chống tay, vẫn tính là nằm.
+
+**Hai phiên bản đầu bị loại** vì làm mất cú ngã thật: tay buông thõng lúc đang rơi và ngã sấp chống tay
+(ur_fall-05, 09) trông giống chống đẩy trong ~0,3 s. Phiên bản đầu làm F1 tập test của cấu hình demo tụt 0,74 → 0,57.
+
+**Kết quả (ảnh 320, giữ frame cuối 2 s, cấu hình demo B):**
+
+| Tập | Trước (TP/FP/FN, trễ) | Sau |
+|---|---|---|
+| val | 5/3/0, 1,04 s | 5/3/0, 1,28 s |
+| test_cu | 5/2/0, 0,70 s | 5/2/0, 1,22 s |
+| test | 7/2/3, 0,64 s | 7/2/3, 0,93 s |
+
+Không mất cú ngã nào, không thêm báo nhầm; đánh đổi là cảnh báo chậm hơn ~0,3–0,5 s ở các cú ngã sấp chống tay.
+Kiểm thử: `test_pushup_does_not_alarm`, `test_hand_catch_fall_still_alarms` (22/22 passed).
+
+**Phạm vi.** Luật chỉ bật trong `config_demo.yaml` (`support_drop: 0.25`); thí nghiệm chính A/B/C giữ nguyên
+(`support_drop: 0`), nên các bảng ở trên không đổi. Hạn chế còn lại: giữ tư thế pha thấp > 1,5 s, hoặc ngã xong
+nằm chống tay (bò) sẽ không được tính là nằm.
