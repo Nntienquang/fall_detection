@@ -92,6 +92,7 @@ docs/HOC_CODE_LOI.md    Học code lõi, câu hỏi bảo vệ, yêu cầu sửa
 docs/PHAN_TICH_KET_QUA.md  Số liệu, phân tích lỗi, các luật webcam           cả nhóm
 docs/KICH_BAN_DEMO.md   Trình tự demo                                        cả nhóm
 docs/KICH_BAN_VIDEO.md  Kịch bản video giới thiệu (8–10 phút, đủ 4 người)    cả nhóm
+docs/LOI_THOAI_VIDEO.md Lời thoại từng thành viên trong video               cả nhóm
 ```
 
 ## 6. Lỗi thường gặp

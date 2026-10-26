@@ -1,5 +1,7 @@
 # Kịch bản video giới thiệu (8–10 phút)
 
+**Lời thoại chi tiết cho từng người:** xem `LOI_THOAI_VIDEO.md`.
+
 **Yêu cầu của cô:** video chứng minh cả nhóm cùng làm. **Đủ 4 thành viên, hiện mặt khi nói.** Ai không xuất hiện thì không có điểm.
 
 ## Cách quay
