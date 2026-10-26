@@ -1,9 +1,9 @@
 # ===========================================================
 #  Cấu hình DEMO WEBCAM
 #  Nền: phương pháp B (góc thân người), ngưỡng chọn trên tập val — đây là cấu hình cho
-#  F1 = 0.86 trên tập test UR Fall (ảnh 640) khi TẮT 3 luật webcam bên dưới.
-#  Thêm 3 luật chống báo nhầm phát hiện khi thử webcam (xem docs/PHAN_TICH_KET_QUA.md):
-#    ratio_fallback: false · edge_guard: true · still_thresh: 0.12 (chỉ báo khi nằm yên)
+#  F1 = 0.86 trên tập test UR Fall (ảnh 640) khi TẮT các luật webcam bên dưới.
+#  Thêm 4 luật chống báo nhầm phát hiện khi thử webcam (xem docs/PHAN_TICH_KET_QUA.md):
+#    ratio_fallback: false · edge_guard: true · bend_guard: true · still_thresh: 0.12 (chỉ báo khi nằm yên)
 #  Dùng:  python main.py --source 0 --config config_demo.yaml --imgsz 416
 #         streamlit run app.py   (app tự đọc file này nếu có)
 # ===========================================================
@@ -33,6 +33,8 @@ detector:
   dup_overlap: 0.6
   still_thresh: 0.12           # chỉ báo khi người nằm YÊN: vai dịch < 12% chiều dài người trong 1 s (chống đẩy, bò → không báo)
   still_window: 1.0
+  bend_guard: true             # cúi người: chân dựng đứng + hông chưa hạ so với lúc đứng → không phải nằm
+  bend_hip_drop: 0.15
   edge_guard: true             # người bị cắt ở mép ảnh (đứng sát webcam), không thấy cổ chân → không coi là nằm
   ratio_fallback: false        # thiếu vai/hông (ngồi sát webcam) thì không đoán bằng W/H → tránh báo nhầm
   support_drop: 0.0            # luật chống tay: đã thử 26/10, KHÔNG chặn được chống đẩy trên webcam thật → tắt (xem PHAN_TICH_KET_QUA.md)

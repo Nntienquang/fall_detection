@@ -48,7 +48,7 @@ Ba phương pháp chỉ khác nhau ở **cách quyết định một khung hình
 | Tập test, ảnh 640 | **B tốt nhất: F1 = 0,86** (bắt 9/10 cú ngã, 2 báo nhầm); A 0,78; C 0,74 |
 | Tập test, ảnh 320 | B 0,78; A 0,71; C 0,67 (C không báo nhầm lần nào nhưng sót nhiều) |
 | Tốc độ CPU | ảnh 640 ~13 FPS; ảnh 416 ~21 FPS (36 ms/khung) |
-| Webcam thật | ngã lên đệm 2/2 lần được báo, đứng dậy thì về bình thường |
+| Webcam thật | ngã lên đệm 2/2 lần được báo; đã xử lý 4 kiểu báo nhầm (ngồi sát webcam, người bị cắt mép ảnh, cúi người lâu, chống đẩy/bò) |
 | Hạn chế đã biết | giữ yên tư thế quỳ chống tay/chống đẩy lâu vẫn bị báo (đã giảm bằng luật nằm yên); ngã thẳng về phía camera; người bị che; người ra khỏi khung (fall-19) |
 
 ---
@@ -172,9 +172,10 @@ if method == "A":          return aspect_ratio > ratio_thresh      # phương ph
 if torso_angle is None:    return ratio_fallback and aspect_ratio > ratio_thresh
 return torso_angle > angle_thresh                                  # B và C (demo: 45°)
 ```
-Hai luật chống báo nhầm khi demo webcam, đều phát hiện từ lỗi thật và đều **không đổi kết quả trên UR Fall**:
+Các luật chống báo nhầm khi demo webcam, đều phát hiện từ lỗi thật khi thử webcam:
 - `ratio_fallback: false`: không thấy vai hoặc hông (ngồi sát webcam, chỉ thấy đầu và vai) thì không đoán bừa bằng W/H.
 - `edge_guard: true`: khung người chạm mép ảnh **và** không thấy cổ chân (người đứng sát webcam cúi xuống, bị cắt mất nửa dưới) thì không kết luận "nằm". Hàm `_truncated` trong `src/fall_detector.py`.
+- `bend_guard: true`: thân ngang nhưng **chân dựng đứng** (trục hông → cổ chân lệch ≤ 25°, cổ chân thấp hơn hông ≥ 35% thân) **và hông chưa hạ** quá 15% so với lần đứng thẳng gần nhất → đang cúi, không phải nằm. Hàm `_legs_upright` trong `src/features.py`. Trên UR Fall: báo nhầm 7 → 1, đổi lại sót thêm 1–2 cú ngã hướng thẳng về camera.
 
 ### Câu hỏi bảo vệ
 | Câu hỏi | Gợi ý trả lời |
@@ -185,6 +186,7 @@ Hai luật chống báo nhầm khi demo webcam, đều phát hiện từ lỗi t
 | Ngưỡng 45° lấy ở đâu? | Grid search trên tập val (thử 45–70°), chọn F1 cao nhất. Không chỉnh trên test |
 | Ngã thẳng về phía camera thì sao? | Góc 2D thay đổi ít vì thân đổ theo chiều sâu. Đây là hạn chế đã ghi nhận; cần camera đặt cao, nhiều camera, hoặc dữ liệu độ sâu |
 | Chống đẩy sao lại bị báo? | Trong một khung hình, chống đẩy và nằm sau ngã đều có thân nằm ngang: hình học 2D giống nhau, chỉ khác ý định. Nhóm đã thử luật "chống tay" nhưng không đủ trên webcam thật; hướng xử lý là kiểm tra bất động sau ngã hoặc học theo chuỗi thời gian |
+| Cúi người lâu có bị báo không? | Trước đây có (góc 53°, giữ yên). Nay có `bend_guard`: chân còn dựng đứng và hông chưa hạ so với lúc đứng thì là cúi. Đánh đổi: người ngã **hướng thẳng về camera** trên ảnh 2D trông giống người cúi (chân dựng, hông không hạ trên ảnh), nên có thể bị sót (fall-18) |
 | Người đứng sát camera cúi xuống có bị báo không? | Trước đây có (góc 44–47°, chỉ thấy nửa trên). Nay có `edge_guard`: chạm mép ảnh mà không thấy cổ chân thì không kết luận nằm. Đánh đổi: người ngã mà chân ra ngoài khung sẽ không được báo |
 | Vì sao chuẩn hóa theo `max(W, H)` mà không theo chiều cao? | Người ngã thì chiều cao khung giảm mạnh, còn cạnh dài nhất gần như giữ nguyên chiều dài cơ thể |
 

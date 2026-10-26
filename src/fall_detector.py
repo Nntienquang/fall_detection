@@ -38,6 +38,7 @@ class _Track:
     last_descent_t: float | None = None
     last_fast_t: float | None = None
     support_hist: deque = field(default_factory=lambda: deque(maxlen=90))  # (t, có chống tay) khi thân ngang
+    stand_ref: tuple[float, float] | None = None  # (hip_y, body_len) lần gần nhất đứng thẳng
     motion_hist: deque = field(default_factory=lambda: deque(maxlen=150))  # (t, x vai, y vai, body_len)
     susp_frames: int = 0
     susp_horiz: int = 0
@@ -201,6 +202,12 @@ class FallDetector:
         h = self.is_horizontal(f)
         unknown = h is None
         horizontal = bool(h)
+        if h is False and f.torso_angle is not None and f.torso_angle < 30:
+            tr.stand_ref = (f.hip_y, f.body_len)
+        if horizontal and c.bend_guard and f.legs_upright and tr.stand_ref is not None:
+            # Cúi người: thân ngang nhưng chân vẫn dựng đứng và hông chưa hạ so với lúc đứng → coi là đứng.
+            if (f.hip_y - tr.stand_ref[0]) / max(tr.stand_ref[1], 1.0) < c.bend_hip_drop:
+                horizontal = False
         drop, speed = self._descent(tr, t)
         tr.speed = speed
         if speed >= c.min_descent_speed:

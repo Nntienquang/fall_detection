@@ -36,6 +36,7 @@ class PoseFeatures:
     arm_drop: float = 0.0       # cổ tay thấp hơn vai bao nhiêu (theo body_len), chỉ tính tay gần thẳng đứng
     truncated: bool = False     # người bị cắt ở mép ảnh (chạm mép + không thấy cổ chân) → khung xương không đáng tin
     anchor: tuple[float, float] | None = None  # trung điểm vai (không thấy vai thì tâm khung) — dùng đo mức cử động
+    legs_upright: bool = False  # hông ở ngay trên cổ chân (chân dựng đứng) — dấu hiệu đang đứng/cúi
 
     @property
     def valid(self) -> bool:
@@ -114,7 +115,24 @@ def compute_features(bbox: np.ndarray, kps: np.ndarray, conf: np.ndarray, kp_thr
         n_valid=int((conf >= kp_thr).sum()),
         arm_drop=arm_drop(kps, conf, kp_thr, body_len, bbox),
         anchor=_anchor(kps, conf, kp_thr, ((x1 + x2) / 2.0, (y1 + y2) / 2.0)),
+        legs_upright=_legs_upright(kps, conf, kp_thr, body_len),
     )
+
+
+LEG_MAX_ANGLE = 25.0   # độ: trục hông → cổ chân lệch phương thẳng đứng tối đa
+LEG_MIN_DROP = 0.35    # cổ chân thấp hơn hông ít nhất 35% chiều dài người
+
+
+def _legs_upright(kps, conf, thr, body_len) -> bool:
+    """Chân dựng đứng: cổ chân ở ngay dưới hông và thấp hơn hông rõ rệt (đứng, cúi người)."""
+    hp = _mid(kps, conf, L_HIP, R_HIP, thr)
+    an = _mid(kps, conf, L_ANKLE, R_ANKLE, thr)
+    if hp is None or an is None:
+        return False
+    dx, dy = float(an[0] - hp[0]), float(an[1] - hp[1])
+    if dy < LEG_MIN_DROP * body_len:
+        return False
+    return math.degrees(math.atan2(abs(dx), dy)) <= LEG_MAX_ANGLE
 
 
 def _anchor(kps, conf, thr, fallback):

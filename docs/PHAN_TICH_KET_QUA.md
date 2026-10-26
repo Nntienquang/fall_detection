@@ -164,3 +164,28 @@ Chống đẩy thật: vai dịch khoảng 0,3 chiều dài người. Chọn 0,1
 **Hạn chế còn lại:** giữ yên tư thế quỳ chống tay hoặc pha thấp chống đẩy quá ~1,5 s vẫn bị báo; người ngã còn
 giãy giụa sẽ được báo chậm hơn. Kiểm thử: `test_pushup_moving_does_not_alarm_with_still_check`,
 `test_real_fall_still_alarms_with_still_check`, `test_still_check_cancels_when_person_gets_up` (27/27 passed).
+
+## Bổ sung 26/10 (4) — Cúi người giữ yên bị báo ngã
+
+**Hiện tượng (webcam).** Đứng cúi người nhặt đồ, góc thân 53°, giữ yên → FALL. Luật nằm yên không giúp vì người đứng yên.
+
+**Đặc trưng phân biệt.** Người cúi: **chân dựng đứng** (trục hông → cổ chân lệch ≤ 25° so với phương thẳng đứng,
+cổ chân thấp hơn hông ≥ 35% chiều dài người) **và hông chưa hạ** (< 15% chiều dài người so với lần đứng thẳng gần nhất).
+Người ngã: chân nằm ngang hoặc hông rơi xuống sàn. Luật `bend_guard` coi trường hợp này là đứng.
+
+**Đã thử và loại:** chỉ dùng góc chân, hoặc chỉ dùng độ cao hông. Người ngã **hướng chân về camera** (fall-13, 17, 18)
+trên ảnh 2D có chân dựng đứng (1–13°) và hông gần như không hạ — giống hệt người cúi.
+
+**Kết quả UR Fall (cấu hình demo, ảnh 320, TP/FP/FN, giữ khung cuối 2 s chính thức):**
+
+| | val | test_cu | test | Báo nhầm ở video |
+|---|---|---|---|---|
+| Không `bend_guard` | 5/3/0 | 5/2/0 | 7/2/3 | adl-01, 04, 05, 06, 10, 11, 17 |
+| Có `bend_guard` | 4/0/1 | 5/1/0 | 6/0/4 | adl-10 |
+
+Báo nhầm tổng 7 → 1 (các ca cúi người adl-04, 05, 06, 17 hết hẳn); sót thêm fall-05 và fall-18 (ngã hướng về camera).
+Khi kết hợp với luật nằm yên: không còn báo nhầm nào trên cả 3 tập, nhưng sót nhiều hơn do clip UR ngắn (mục (3)).
+
+**Áp dụng.** Bật trong `config_demo.yaml`; khi demo, ngã **ngang qua khung hình**, không ngã thẳng về phía camera.
+Thí nghiệm chính giữ nguyên. Kiểm thử: `test_bending_and_holding_does_not_alarm_with_bend_guard`,
+`test_real_fall_still_alarms_with_all_webcam_rules` (29/29 passed).

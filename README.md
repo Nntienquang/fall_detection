@@ -87,7 +87,7 @@ tools/cache_poses.py    Chạy YOLO 1 lần cho mọi video                     
 tools/tune.py           Grid search ngưỡng trên val                          TV2
 tools/evaluate.py       So sánh A/B/C trên test                              TV4
 tools/plot_features.py  Biểu đồ đặc trưng theo thời gian                     TV2/TV4
-tests/                  27 unit test                                         TV2/TV4
+tests/                  29 unit test                                         TV2/TV4
 docs/HOC_CODE_LOI.md    Học code lõi, câu hỏi bảo vệ, yêu cầu sửa tại chỗ    cả nhóm
 docs/PHAN_TICH_KET_QUA.md  Số liệu, phân tích lỗi, các luật webcam           cả nhóm
 docs/KICH_BAN_DEMO.md   Trình tự demo                                        cả nhóm

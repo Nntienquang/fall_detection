@@ -10,7 +10,7 @@ Dùng cho cả **buổi báo cáo** và **phần demo trong video**. Tập trư�
    git pull
    python -m pytest -q
    ```
-   Phải ra **27 passed**.
+   Phải ra **29 passed**.
 2. Thử webcam:
    ```
    python main.py --source 0 --config config_demo.yaml --imgsz 416
@@ -29,7 +29,7 @@ Dùng cho cả **buổi báo cáo** và **phần demo trong video**. Tập trư�
 | Vàng | SUSPECTED | Thân nghiêng quá 45°, đang theo dõi |
 | Đỏ + viền đỏ + dòng cảnh báo | FALL | Nằm ngang ≥ 0,5 s **và đã nằm yên** khoảng 1 s |
 
-Bản demo chờ người **nằm yên** mới báo, nên vàng sẽ kéo dài thêm khoảng 1–1,5 s so với video UR Fall trên slide. Đây là chủ ý: để chống đẩy, bò không bị báo nhầm.
+Bản demo bỏ qua người **đang cúi** (chân còn đứng, hông chưa hạ) và chờ người **nằm yên** mới báo, nên vàng sẽ kéo dài thêm khoảng 1–1,5 s so với video UR Fall trên slide. Đây là chủ ý: để chống đẩy, bò không bị báo nhầm.
 
 ## Trình tự demo (3–4 phút)
 
@@ -37,8 +37,8 @@ Bản demo chờ người **nằm yên** mới báo, nên vàng sẽ kéo dài t
 |---|---|---|
 | 1 | Một bạn đi lại trước camera | Khung xương 17 điểm, ID, góc thân, FPS hiển thị trực tiếp |
 | 2 | **Ngồi xuống ghế**, rồi đứng lên | Ngồi: góc thân nhỏ, vẫn xanh, không báo |
-| 3 | **Cúi nhặt đồ**, đứng lên | Có thể vàng thoáng qua, đứng dậy thì huỷ, không báo |
-| 4 | **Ngã có kiểm soát xuống đệm**, **nằm yên 3 giây** | Vàng → đỏ, cảnh báo bật lên, lưu ảnh |
+| 3 | **Cúi nhặt đồ**, giữ vài giây, đứng lên | Thân nghiêng nhưng chân vẫn đứng, hông chưa hạ → không báo |
+| 4 | **Ngã có kiểm soát xuống đệm, ngang qua khung hình** (không ngã thẳng về phía camera), **nằm yên 3 giây** | Vàng → đỏ, cảnh báo bật lên, lưu ảnh |
 | 5 | Đứng dậy, chờ 2 giây | Ghi RECOVERED, khung về xanh |
 | 6 | Mở thư mục `outputs/` mới nhất | `events.csv` (thời điểm, góc thân) và ảnh chụp lúc ngã |
 | 7 | `python main.py --source data/videos/ur_fall-11.mp4 --config config_demo.yaml` | Cùng hệ thống trên video người thật của bộ dữ liệu UR Fall |

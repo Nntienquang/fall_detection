@@ -273,3 +273,35 @@ def test_still_check_cancels_when_person_gets_up():
             ps = [to_person(1, skeleton(300, 300, 200, 0))]
         alerts += [e for e in det.update(ps, t)[1] if e.kind == "FALL"]
     assert alerts == []
+
+
+def _bend_frames(angle=60.0, fps=30, L=200.0):
+    """Đứng 1.5 s rồi cúi người (thân nghiêng `angle`°) và GIỮ YÊN 4 s; chân dựng đứng, hông giữ nguyên độ cao."""
+    frames = []
+    for i in range(int(5.5 * fps)):
+        t = i / fps
+        a = 0.0 if t < 1.5 else angle * min((t - 1.5) / 0.5, 1.0)
+        k = skeleton(300, 300, L, a)
+        k[11:17] = skeleton(300, 300, L, 0)[11:17]   # hông, gối, cổ chân giữ như lúc đứng
+        frames.append((t, [to_person(1, k)]))
+    return frames
+
+
+def test_bending_and_holding_does_not_alarm_with_bend_guard():
+    """Lỗi thật trên webcam 26/10: đứng cúi người 53° giữ yên → bị báo FALL.
+    Chân vẫn dựng đứng, hông chưa hạ so với lúc đứng → đang cúi, không phải nằm."""
+    results = {}
+    for guard in (False, True):
+        det = FallDetector(replace(DEMO_STILL, bend_guard=guard))
+        results[guard] = [e for t, ps in _bend_frames() for e in det.update(ps, t)[1] if e.kind == "FALL"]
+    assert results[False], "không bật bend_guard thì ca này phải bị báo nhầm (test có ý nghĩa)"
+    assert results[True] == []
+
+
+def test_real_fall_still_alarms_with_all_webcam_rules():
+    cfg = replace(DEMO_STILL, bend_guard=True, edge_guard=True)
+    for seed in (1, 2, 3):
+        frames, falls = scenario("fall", seed=seed)
+        det = FallDetector(cfg)
+        alerts = [e for t, ps in frames for e in det.update(ps, t, (480, 640))[1] if e.kind == "FALL"]
+        assert len(alerts) == 1 and match_events([e.t for e in alerts], falls).tp == 1

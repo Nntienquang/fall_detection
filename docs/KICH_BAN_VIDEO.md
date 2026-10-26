@@ -51,13 +51,13 @@
 - Bản demo chờ người nằm yên mới báo, để chống đẩy, bò không bị báo nhầm.
 
 **Cảnh 6 – Demo (cả 4)**
-- Theo `KICH_BAN_DEMO.md`, bước 1–6. **Mỗi người xuất hiện ít nhất một lần trước webcam**, ví dụ: TV1 đi lại, TV2 ngồi ghế, TV3 cúi nhặt đồ, TV4 ngã xuống đệm và nằm yên. Ai đứng ngoài thì nói giải thích.
+- Theo `KICH_BAN_DEMO.md`, bước 1–6. Ngã ngang qua khung hình, không ngã thẳng về phía camera. **Mỗi người xuất hiện ít nhất một lần trước webcam**, ví dụ: TV1 đi lại, TV2 ngồi ghế, TV3 cúi nhặt đồ, TV4 ngã xuống đệm và nằm yên. Ai đứng ngoài thì nói giải thích.
 - Kết thúc bằng mở `outputs/`: ảnh chụp lúc ngã và `events.csv`.
 
 **Cảnh 7 – Kết quả & hạn chế (TV4)**
 - 40 video người thật UR Fall; chọn ngưỡng trên val, báo cáo trên test chưa từng dùng.
 - B tốt nhất: F1 0,86, bắt 9/10 cú ngã, 2 báo nhầm, trễ trung bình 0,7 s. Giả thuyết "C tốt nhất" không được xác nhận, nhóm báo cáo trung thực.
-- Webcam: 13–21 FPS trên CPU; đã xử lý 3 kiểu báo nhầm gặp khi thử. Hạn chế còn lại: giữ yên tư thế quỳ chống tay, ngã thẳng về phía camera.
+- Webcam: 13–21 FPS trên CPU; đã xử lý 4 kiểu báo nhầm gặp khi thử (ngồi sát webcam, bị cắt mép ảnh, cúi người lâu, chống đẩy). Hạn chế còn lại: giữ yên tư thế quỳ chống tay, ngã thẳng về phía camera.
 
 **Cảnh 8 – Kết luận (cả 4)**
 - Hướng phát triển: quay thêm dữ liệu, học từ chuỗi khung xương, gửi thông báo về điện thoại.
