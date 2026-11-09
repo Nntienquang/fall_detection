@@ -1,12 +1,23 @@
 # Lời thoại video giới thiệu — từng thành viên
 
-Dùng kèm `KICH_BAN_VIDEO.md` (cách quay, phân cảnh) và bộ slide 16 trang. Tổng khoảng **9–10 phút**.
+Dùng kèm `KICH_BAN_VIDEO.md` (cách quay, phân cảnh) và bộ slide 16 trang. Tổng khoảng **10 phút**.
+
+**Yêu cầu của cô:** video phải thấy **mặt cả 4 thành viên** và **mỗi người đều nói**, nếu không sẽ không được điểm. Đăng YouTube ở chế độ **Không công khai (Unlisted)**, nộp link qua form trước **23h00 07/11**.
 
 **Cách dùng:**
 - Mỗi người **đọc to phần mình 3–4 lần trước khi quay** cho quen, rồi nói tự nhiên theo ý; không cần thuộc từng chữ. Không nhìn chằm chằm vào giấy khi nói.
 - Chữ trong ngoặc vuông `[…]` thay bằng thông tin thật. Dòng *nghiêng* là chỉ dẫn hành động, không đọc.
 - Xưng "em", gọi "cô". Nói chậm, rõ; khoảng 150 chữ mỗi phút.
 - Ai đang nói thì **bật camera**. Khi chia sẻ màn hình, camera vẫn hiện ở góc.
+
+**Cách quay để không mất hình webcam:**
+- Cảnh demo (cảnh 6): để chương trình **tự ghi video**, đừng quay màn hình:
+  ```
+  python main.py --source 1 --config config_demo.yaml --imgsz 416 --save-video
+  ```
+  Bấm Q để dừng; file `annotated.mp4` nằm trong thư mục `outputs/<thời gian>/` (đường dẫn in ở cuối terminal). Dùng `--source 1` cho iVCam (iPhone), `--source 0` cho webcam laptop.
+- Cảnh nói và cảnh slide/VS Code: quay màn hình bằng **OBS → Display Capture** (không dùng Game Bar Win+G, vì nó chỉ quay một cửa sổ). Mặt người nói quay bằng webcam laptop hoặc điện thoại.
+- Ghép lại trong CapCut hoặc Clipchamp: video demo/slide ở khung lớn, mặt người nói ở góc nhỏ.
 
 | Cảnh | Người nói | Thời lượng | Slide / màn hình |
 |---|---|---|---|
@@ -16,7 +27,7 @@ Dùng kèm `KICH_BAN_VIDEO.md` (cách quay, phân cảnh) và bộ slide 16 tran
 | 4. Đặc trưng hình học | TV2 | 1:30 | Slide 5 → VS Code `features.py` |
 | 5. Phân tích theo thời gian | TV3 | 1:30 | Slide 5–7 → VS Code `_step` |
 | 6. Demo | Cả 4 | 2:00 | Webcam trực tiếp → thư mục `outputs/` |
-| 7. Kết quả & hạn chế | TV4 | 1:15 | Slide 8–13 |
+| 7. Kết quả, hạn chế & phương pháp D | TV4 | 1:45 | Slide 8–13 → `results/learned.md` |
 | 8. Kết luận | Cả 4 | 0:30 | Slide 15–16, mặt cả nhóm |
 
 ---
@@ -33,7 +44,7 @@ Dùng kèm `KICH_BAN_VIDEO.md` (cách quay, phân cảnh) và bộ slide 16 tran
 
 **TV3:** "Em là [tên TV3], em phụ trách phần **phân tích theo thời gian**: máy trạng thái quyết định khi nào là một cú ngã thật."
 
-**TV4:** "Còn em là [tên TV4], em phụ trách **luồng chạy chính, đánh giá kết quả và phần demo**. Em xin bắt đầu với bài toán."
+**TV4:** "Còn em là [tên TV4], em phụ trách **luồng chạy chính, đánh giá kết quả, phần demo và thí nghiệm học máy**. Em xin bắt đầu với bài toán."
 
 ---
 
@@ -49,7 +60,7 @@ Nhóm em đặt ra ba yêu cầu cho hệ thống: một là chạy được tr�
 
 "Đây là kiến trúc hệ thống. Mỗi khung hình đi qua năm bước. Bước một, lấy ảnh từ camera hoặc video. Bước hai, mô hình YOLO11n-Pose tìm người và 17 khớp trên cơ thể. Bước ba, ByteTrack gán cho mỗi người một ID để theo dõi qua thời gian. Bước bốn, tính các đặc trưng như góc thân người. Và bước năm, máy trạng thái quyết định có phát cảnh báo hay không.
 
-Bước hai và ba nhóm dùng mô hình có sẵn của thư viện Ultralytics, không huấn luyện lại. **Phần nhóm tự xây dựng là bước bốn, bước năm và toàn bộ phần đánh giá.** Sau đây bạn [tên TV1] sẽ trình bày bước hai và ba."
+Bước hai và ba nhóm dùng mô hình có sẵn của thư viện Ultralytics, đã được huấn luyện trên bộ ảnh COCO, nhóm không huấn luyện lại. Nói gọn: YOLO lo phần **nhìn**, còn nhóm làm phần **hiểu**. **Phần nhóm tự xây dựng là bước bốn, bước năm, bốn phương pháp A, B, C, D và toàn bộ phần đánh giá.** Sau đây bạn [tên TV1] sẽ trình bày bước hai và ba."
 
 ---
 
@@ -105,7 +116,7 @@ Bình thường là NORMAL, khung màu xanh. Khi thân người nằm ngang, và
 
 *Chuyển sang slide 6.*
 
-"Nhóm so sánh ba phương pháp, chỉ khác nhau ở cách quyết định một khung là đang nằm: A dùng tỷ lệ khung người, B dùng góc thân, còn C thêm điều kiện phải có cú hạ hông nhanh trước đó, vì ngã thì rơi nhanh còn chủ động nằm thì chậm.
+"Nhóm so sánh bốn phương pháp, chỉ khác nhau ở cách quyết định một khung là đang nằm. A dùng tỷ lệ khung người. B dùng góc thân. C thêm điều kiện phải có cú hạ hông nhanh trước đó, vì ngã thì rơi nhanh còn chủ động nằm thì chậm. Còn D thay luật bằng một mạng nơ-ron nhỏ do nhóm tự huấn luyện, bạn [tên TV4] sẽ trình bày ở phần kết quả. Cả bốn phương pháp đi qua cùng một máy trạng thái.
 
 Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một giây mới báo. Người ngã thường nằm im, còn chống đẩy thì vai lên xuống liên tục, nên không bị báo nhầm."
 
@@ -117,7 +128,7 @@ Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một g
 
 ## Cảnh 6 — Demo trực tiếp (cả 4, ~2 phút)
 
-*Quay tại phòng, camera thấy trọn người. Chạy `python main.py --source 0 --config config_demo.yaml --imgsz 416`, nhấn F để toàn màn hình. Làm theo `KICH_BAN_DEMO.md`.*
+*Quay tại phòng, camera thấy trọn người. Chạy `python main.py --source 1 --config config_demo.yaml --imgsz 416 --save-video` (iVCam; webcam laptop thì `--source 0`). Làm theo `KICH_BAN_DEMO.md`.*
 
 **TV4 (đứng cạnh máy, giới thiệu):** "Đây là hệ thống đang chạy với webcam của laptop. Góc trên hiển thị số khung hình mỗi giây và thời gian chạy mô hình. Mỗi người có khung, ID và góc thân."
 
@@ -147,7 +158,7 @@ Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một g
 
 ---
 
-## Cảnh 7 — Kết quả và hạn chế (TV4, ~1 phút 15)
+## Cảnh 7 — Kết quả, hạn chế và phương pháp D (TV4, ~1 phút 45)
 
 *Chia sẻ màn hình, slide 8.*
 
@@ -165,6 +176,12 @@ Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một g
 
 "Trên webcam thật, hệ thống chạy 13 đến 21 khung hình mỗi giây. Nhóm đã gặp và xử lý bốn kiểu báo nhầm: ngồi sát webcam, người bị cắt ở mép ảnh, cúi người lâu, và chống đẩy. Hạn chế còn lại là tư thế quỳ chống tay giữ yên và ngã thẳng về phía camera, vì trên ảnh hai chiều chúng trông giống tư thế bình thường. Nhóm đã thử chặn nhưng sẽ làm sót cú ngã thật, mà bỏ sót thì nguy hiểm hơn báo nhầm."
 
+*Mở `docs/PHAN_TICH_KET_QUA.md` mục 5, hoặc `results/learned.md`.*
+
+"Cuối cùng, nhóm thử phương pháp D: thay luật 'góc thân lớn hơn 45 độ' bằng một **mạng nơ-ron nhỏ** hai lớp, 64 và 32 nơ-ron. Đầu vào là 62 đặc trưng khung xương của mỗi khung hình, đầu ra là xác suất người đang nằm sau ngã. Nhóm huấn luyện trên bộ dữ liệu GMDCSA24 công bố năm 2024 và UR Fall, chia **theo người**: người 1 đến 3 để học, người số 4 chỉ để kiểm tra.
+
+Kết quả trên 27 cú ngã chưa từng dùng để học: D **báo nhầm ít nhất**, precision 0,86 so với 0,75 của B, F1 0,75 so với 0,71. Nhưng D sót các cú ngã xuống giường, vì trong dữ liệu, nằm trên giường được gán là sinh hoạt bình thường. Chênh lệch chỉ vài video nên nhóm chưa kết luận D tốt hơn, và demo vẫn dùng B."
+
 ---
 
 ## Cảnh 8 — Kết luận (cả 4, ~30 giây)
@@ -173,7 +190,7 @@ Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một g
 
 **TV2:** "Tóm lại, nhóm em đã xây dựng được hệ thống phát hiện té ngã chạy thời gian thực trên CPU, có đánh giá trên dữ liệu người thật và thử nghiệm trực tiếp bằng webcam."
 
-**TV3:** "Hướng phát triển là quay thêm dữ liệu, học phân loại trực tiếp từ chuỗi khung xương, và gửi thông báo về điện thoại người thân."
+**TV3:** "Hướng phát triển là quay thêm dữ liệu chống đẩy, quỳ chống tay để huấn luyện tiếp phương pháp D, học trực tiếp từ chuỗi khung xương, và gửi thông báo về điện thoại người thân."
 
 **TV1:** "Toàn bộ mã nguồn, báo cáo và slide nhóm em đã nộp kèm theo."
 
@@ -183,4 +200,8 @@ Ngoài ra, bản demo webcam còn chờ người **nằm yên** khoảng một g
 
 ## Nếu cô hỏi thêm trong buổi báo cáo
 
-Câu hỏi và gợi ý trả lời nằm trong `HOC_CODE_LOI.md` (từng phần TV1–TV4 và bảng "Câu hỏi chung").
+Câu hỏi và gợi ý trả lời nằm trong `HOC_CODE_LOI.md` (từng phần TV1–TV4, bảng "Câu hỏi chung" và "Phần mở rộng · Phương pháp D").
+
+Hai câu hay bị hỏi nhất, trả lời ngắn:
+- **"Nhóm có train không?"** YOLO dùng bản có sẵn (huấn luyện trên COCO). Phương pháp B không cần train, ngưỡng chọn trên tập val. Nhóm chỉ tự huấn luyện mạng nơ-ron của phương pháp D, bằng scikit-learn, file `tools/train_fall_model.py`.
+- **"A, B, C, D có phải của YOLO không?"** Không. YOLO chỉ trả toạ độ 17 khớp; A–D là bốn cách nhóm tự viết để đọc toạ độ đó và kết luận người có đang nằm không.

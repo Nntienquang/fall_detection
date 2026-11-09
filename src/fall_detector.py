@@ -112,7 +112,7 @@ class FallDetector:
 
     # ------------------------------------------------------------------ #
     @staticmethod
-    def _overlap(a: np.ndarray, b: np.ndarray) -> float:
+    def _overlap(a: np.ndarray, b: np.ndarray) -> float: #Tính mức chồng lấn 2 bbox theo diện tích khung nhỏ hơn
         """Phần giao / diện tích khung nhỏ hơn (1.0 = khung nhỏ nằm trọn trong khung lớn)."""
         iw = max(0.0, min(a[2], b[2]) - max(a[0], b[0]))
         ih = max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
@@ -128,7 +128,7 @@ class FallDetector:
         ankles = max(p.kp_conf[15], p.kp_conf[16]) >= self.cfg.kp_conf
         return bool(touch and not ankles)
 
-    def _drop_duplicates(self, people: list[Person]) -> list[Person]:
+    def _drop_duplicates(self, people: list[Person]) -> list[Person]: #Loại các khung trùng có khả năng thuộc cùng 1 người
         """YOLO đôi khi trả 2 khung cho cùng 1 người đang nằm, ByteTrack gán ID mới cho khung thứ 2.
         Giữ khung thuộc track đã có (rồi đến khung confidence cao hơn), bỏ khung trùng — nhờ vậy
         khi ID cũ biến mất ở frame sau, ID mới được nối lại với lịch sử cũ thay vì bắt đầu từ đầu."""
@@ -141,7 +141,8 @@ class FallDetector:
                 kept.append(p)
         return kept
 
-    def _get_track(self, tid: int, f: PoseFeatures, t: float, current_ids: set[int]) -> _Track:
+    def _get_track(self, tid: int, f: PoseFeatures, t: float, current_ids: set[int]) -> _Track: #Tìm lại lịch sử người khi tracking cấp ID mới
+        
         if tid in self.tracks:
             return self.tracks[tid]
         # Thử nối với một track vừa mất dấu ở gần vị trí này (ID switch khi ngã)

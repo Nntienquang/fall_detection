@@ -42,29 +42,29 @@ class PoseTracker:
         if pred is not None and hasattr(pred, "vid_path"):
             pred.vid_path = [None]
 
-    def __call__(self, frame: np.ndarray) -> list[Person]:
+    def __call__(self, frame: np.ndarray) -> list[Person]: #Gọi yolo kết hợp byte track
         t0 = time.perf_counter()
         res = self.model.track(
-            frame,
-            persist=True,
-            tracker=self.cfg.tracker,
-            device=self.cfg.device,
-            imgsz=self.cfg.imgsz,
-            conf=self.cfg.conf,
-            iou=self.cfg.iou,
-            classes=[0],
-            verbose=False,
+            frame, #Ảnh đầu vào
+            persist=True, #Ghi lịch sử tracking
+            tracker=self.cfg.tracker, #bytetrack.yaml
+            device=self.cfg.device, #cpu,gpu
+            imgsz=self.cfg.imgsz, # 320/416/640
+            conf=self.cfg.conf, # Ngưỡng tin cậy
+            iou=self.cfg.iou, # Ngưỡng NMS - NON-MAXIMUM SUPPRESSION
+            classes=[0], #Chỉ phát hiện người
+            verbose=False, # tắt log chi tiết
         )[0]
         self.last_infer_ms = (time.perf_counter() - t0) * 1000.0
 
         if res.boxes is None or len(res.boxes) == 0 or res.keypoints is None:
             return []
 
-        boxes = res.boxes.xyxy.cpu().numpy()
-        scores = res.boxes.conf.cpu().numpy()
+        boxes = res.boxes.xyxy.cpu().numpy() #Lấy toạ độ khung người, Mỗi hàng: x1,y1,x2,y2
+        scores = res.boxes.conf.cpu().numpy() 
         ids = res.boxes.id.cpu().numpy().astype(int) if res.boxes.id is not None else None
-        kps = res.keypoints.xy.cpu().numpy()
-        kconf = (res.keypoints.conf.cpu().numpy() if res.keypoints.conf is not None
+        kps = res.keypoints.xy.cpu().numpy() #Lấy toạ độ 16 khớp có thể 
+        kconf = (res.keypoints.conf.cpu().numpy() if res.keypoints.conf is not None #lấy độ tin cậy từng khớp
                  else np.ones(kps.shape[:2], dtype=float))
 
         people = []
